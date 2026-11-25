@@ -1,0 +1,86 @@
+name: Apply SIPS-inspired style
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-sips-style.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  style:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add shared theme without replacing application code
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          css = '''/* SIPS-inspired maritime theme. Application logic and database values unchanged. */
+          :root{--bg:#f4efe5;--paper:#fffcf5;--ink:#183d50;--muted:#64747a;--line:#d9d6c9;--accent:#e5c88f;--green:#183d50;--orange:#9a6837;--sips-navy:#183d50;--sips-cream:#f4efe5;--sips-gold:#e5c88f}
+          body{background:var(--sips-cream)!important;color:var(--sips-navy)!important;font-family:Arial,Helvetica,sans-serif;line-height:1.5}
+          header{background:var(--sips-navy)!important;color:var(--sips-cream)!important;border-bottom:1px solid #ffffff26!important;padding:22px 5%!important}
+          .brand,header>strong{font-family:Georgia,'Times New Roman',serif!important;font-size:30px!important;font-weight:400!important;letter-spacing:2px!important}
+          .brand span{color:var(--sips-gold)!important}
+          h1,h2,.hero h1,.checkout h1,.success h1{font-family:Georgia,'Times New Roman',serif!important;font-weight:400!important;letter-spacing:-.035em!important}
+          h1{font-size:clamp(32px,5vw,58px);line-height:1.12}
+          h2{line-height:1.2}h3{font-weight:600}
+          .wrap{max-width:1280px;padding-top:38px}.eyebrow{letter-spacing:.2em;font-size:10px}
+          .hero{background:var(--sips-navy)!important;border:1px solid #ffffff26;border-radius:3px!important;padding:40px!important;color:var(--sips-cream)!important}
+          .hero h1{font-size:clamp(38px,5vw,64px)!important}.hero p{color:#e3e5de!important}.hero .eyebrow{color:var(--sips-gold)!important}
+          .hero .decor{display:none}.hero:after{content:'';position:absolute;right:30px;top:30px;width:140px;height:140px;border:1px solid #e5c88f55;border-radius:50%;pointer-events:none}
+          .tabletag{color:var(--sips-cream);border-color:#e5c88f60!important;background:transparent!important;letter-spacing:.05em}
+          .nav{background:#ffffff12!important;border:1px solid #ffffff25}.nav button{color:var(--sips-cream)!important}.nav button.active{background:var(--sips-gold)!important;color:var(--sips-navy)!important}
+          .demo{background:#e7dfd0!important;color:var(--sips-navy)!important}
+          .tabs button{background:transparent!important;border-color:#bfc7c6!important;color:var(--sips-navy)!important;border-radius:4px!important;letter-spacing:.04em}
+          .tabs button.active{background:var(--sips-navy)!important;color:var(--sips-cream)!important;border-color:var(--sips-navy)!important}
+          .product,.cart,.box,.modal,.order,.stat,body>main>section,#orders article{background:var(--paper)!important;border-color:var(--line)!important;border-radius:5px!important;box-shadow:0 8px 26px #183d5005}
+          .product{transition:transform .18s ease,box-shadow .18s ease}.product:hover{transform:translateY(-2px);box-shadow:0 10px 24px #183d5010}
+          .picture,.picture.warm,.picture.pink{background:linear-gradient(135deg,#e9e4d8,#d5dedb)!important;border-bottom:1px solid var(--line)}
+          .badge{background:var(--paper)!important;color:var(--sips-navy)!important;border-radius:3px!important;letter-spacing:.08em}
+          .productbody{padding:20px}.product h3{font-family:Georgia,'Times New Roman',serif;font-size:20px;font-weight:400}
+          .add{background:var(--sips-gold)!important;color:var(--sips-navy)!important;border-radius:4px!important;width:38px;height:38px}
+          button{background:var(--sips-navy);color:var(--sips-cream);border-radius:5px}
+          .primary{background:var(--sips-navy)!important;color:var(--sips-cream)!important;border-radius:4px!important;letter-spacing:.035em}
+          .secondary{background:#e9e1d2!important;color:var(--sips-navy)!important;border-radius:4px!important}
+          .quantity button{background:var(--sips-cream)!important;color:var(--sips-navy)!important}.back{background:none!important;color:var(--muted)!important}
+          .payoption{background:var(--paper)!important;color:var(--sips-navy)!important;border-radius:5px!important}.payoption.selected{border-color:var(--sips-navy)!important;background:#edf0e9!important}
+          .statusicon{background:#e8dfc9!important;color:var(--sips-navy)!important}.tracking .active{background:var(--sips-navy)!important;color:var(--sips-cream)!important}
+          .pill{background:#efe2c7!important;color:#795428!important}.pill.paid{background:#e0e9e5!important;color:#244b43!important}
+          .search,input,textarea,select{background:var(--paper)!important;color:var(--sips-navy)!important;border-color:#bfc7c6!important;border-radius:4px!important}
+          .close{background:var(--sips-cream)!important;color:var(--sips-navy)!important}.inlineinfo,.allergens{background:#eee8dd!important;color:var(--sips-navy)!important}
+          .small,.muted,footer{color:var(--muted)!important}.toast{background:var(--sips-navy)!important;color:var(--sips-cream)!important}.overlay{background:#102b3bd9!important}
+          button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #b68b43!important;outline-offset:3px}
+          #login{padding:34px!important;margin:45px auto!important;max-width:460px!important}#login h1{font-size:36px}#submit{width:100%;padding:15px}#dashboard{padding:28px!important}#orders article{padding:24px!important}#orders article h2{font-size:24px}#orders article>strong{font-size:23px;font-family:Georgia,serif}#orders article ul{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding-top:12px;padding-bottom:12px}#message:empty{display:none}
+          @media(max-width:740px){header{padding:16px 18px!important}.brand,header>strong{font-size:24px!important}.hero{padding:28px 22px!important}.hero:after{width:90px;height:90px;right:-25px;top:18px}.hero h1{font-size:40px!important}.productbody{padding:14px}.product h3{font-size:17px}.wrap{padding-top:22px}#login{padding:24px!important;margin:20px auto!important}#dashboard{padding:18px!important}body>main{padding:18px}.mobilecart{border-radius:5px!important}}
+          @media(prefers-reduced-motion:reduce){.product{transition:none}.product:hover{transform:none}}
+          '''
+          pages = [Path('index.html'), Path('staff.html')]
+          for page in pages:
+              if not page.is_file():
+                  raise SystemExit(f'Missing {page}; no HTML changes made')
+              html = page.read_text(encoding='utf-8')
+              if len(re.findall(r'</head\s*>', html, re.I)) != 1:
+                  raise SystemExit(f'Expected exactly one head closing tag in {page}')
+          Path('css').mkdir(exist_ok=True)
+          Path('css/sips-theme.css').write_text(css, encoding='utf-8')
+          tag = '<link rel="stylesheet" href="./css/sips-theme.css">'
+          for page in pages:
+              html = page.read_text(encoding='utf-8')
+              if './css/sips-theme.css' not in html:
+                  html = re.sub(r'</head\s*>', lambda m: tag + '\n' + m.group(0), html, count=1, flags=re.I)
+              if page.name == 'index.html':
+                  html = html.replace('<div class="brand">aan tafel<span>●</span></div>', '<div class="brand">SIPS<span>●</span></div>')
+              else:
+                  html = html.replace('Aan Tafel · Personeel', 'SIPS · Personeel').replace('Aan Tafel — Personeel', 'SIPS — Personeel')
+              page.write_text(html, encoding='utf-8')
+      - name: Commit theme
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add css/sips-theme.css index.html staff.html
+          if git diff --cached --quiet; then
+            echo 'Theme already applied'
+          else
+            git commit -m 'Apply SIPS-inspired theme without changing ordering or authentication'
+            git push
