@@ -57,5 +57,6 @@ function resetDemo(){modal('<h2>Demo opnieuw beginnen?</h2><p class="small">Je w
 function confirmReset(){cart=[];orders=[];category='Alles';query='';page='menu';view='guest';lastOrder=null;seq=100;closeModal();render();notify('Demo is gereset')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});render();
 </script>
+<script type="module" src="./js/live-guest.js"></script>
 </body>
 </html>
