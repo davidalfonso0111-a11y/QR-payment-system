@@ -157,6 +157,12 @@ async function sendCashOrder(token, body) {
         result.total_cents < 0 || result.order_number == null) {
       throw new GuestApiError('Onvolledige bestelbevestiging. Herhaal dezelfde aanvraag.', { uncertain: true });
     }
+    // Preserve the private receipt BEFORE clearing the retry request.
+    try {
+      localStorage.setItem('qr-payment:receipt:v1:' + token, JSON.stringify({receipt: result, secret: body.p_guest_secret}));
+    } catch {
+      throw new GuestApiError('Bestelling opgeslagen, maar bevestiging kon niet worden bewaard. Herhaal dezelfde aanvraag.', {uncertain: true});
+    }
     // Keep the pending request if storage cleanup fails. Retrying will replay it.
     try { localStorage.removeItem(STORAGE_PREFIX + token); } catch { /* safe replay */ }
     return result;

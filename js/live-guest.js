@@ -6,6 +6,7 @@
  */
 import {getTableTokenFromUrl,getGuestMenu,createCashOrder,hasPendingCashOrder,retryPendingCashOrder} from './guest-api.js';
 
+import {loadReceipt,startTracking,stopTracking} from './guest-status.js';
 const baseRender = window.render;
 let token, restaurant, tableNumber, sending=false, pending=false, receipt=null, failure='';
 const app=document.getElementById('app');
@@ -21,13 +22,13 @@ window.placeOrder=()=>{};
 window.staffHTML=()=>'<p>Personeelslogin is nog niet beschikbaar.</p>';
 
 function recoveryHTML(){return `<section class="checkout"><div class="box"><h1>Bestelling controleren</h1><p>Er staat een eerdere aanvraag klaar. Die kan al zijn opgeslagen. Maak nog geen nieuwe bestelling.</p><p class="small">We herhalen exact dezelfde aanvraag. De database voorkomt een dubbele bestelling voor deze aanvraag.</p>${failure?`<p role="alert">${escapeHtml(failure)}</p>`:''}<button class="primary full" onclick="recoverCash()" ${sending?'disabled':''}>${sending?'Bevestiging ophalen…':'Eerdere aanvraag herstellen'}</button><p class="hint">Lukt dit niet? Vraag het personeel om hulp. Wis je browseropslag niet om opnieuw te bestellen.</p></div></section>`;}
-function receiptHTML(){const labels={awaiting_acceptance:'Wacht op acceptatie',accepted:'Geaccepteerd',preparing:'In bereiding',ready:'Klaar',served:'Geserveerd',cancelled:'Geannuleerd'};return `<section class="checkout success"><div class="statusicon">✓</div><div class="eyebrow">${escapeHtml(restaurant.name)} · Tafel ${escapeHtml(tableNumber)}</div><h1>Bestelling #${escapeHtml(receipt.order_number)}</h1><div class="box"><h2>${money(receipt.total_cents)}</h2><p>${escapeHtml(labels[receipt.status]||receipt.status)}</p><p>${receipt.payment_status==='unpaid'?'Nog te betalen · cash aan de kassa':'Betaalstatus: '+escapeHtml(receipt.payment_status)}</p><p class="small">Dit is de status bij de laatste databasebevestiging, geen live opvolging. Geef je tafelnummer en bestelnummer door aan het personeel.</p></div><button class="primary full" onclick="newCashOrder()">Nog iets bestellen →</button></section>`;}
-window.newCashOrder=()=>{if(sending||pending)return;receipt=null;page='menu';window.render();};
+function receiptHTML(){const labels={awaiting_acceptance:'Wacht op acceptatie',accepted:'Geaccepteerd',preparing:'In bereiding',ready:'Klaar',served:'Geserveerd',cancelled:'Geannuleerd'};return `<section class="checkout success"><div class="statusicon">✓</div><div class="eyebrow">${escapeHtml(restaurant.name)} · Tafel ${escapeHtml(tableNumber)}</div><h1>Bestelling #${escapeHtml(receipt.order_number)}</h1><div class="box"><h2>${money(receipt.total_cents)}</h2><p>${escapeHtml(labels[receipt.status]||receipt.status)}</p><p>${receipt.payment_status==='unpaid'?'Nog te betalen · cash aan de kassa':'Betaalstatus: '+escapeHtml(receipt.payment_status)}</p><p class="small"><span id="guest-status-message" role="status" aria-live="polite">Actuele status wordt opgehaald…</span> Geef je tafelnummer en bestelnummer door aan het personeel.</p></div><button class="primary full" onclick="newCashOrder()">Nog iets bestellen →</button></section>`;}
+window.newCashOrder=()=>{if(sending||pending)return;stopTracking();receipt=null;page='menu';window.render();};
 window.render=()=>{
   if(!restaurant)return;
   view='guest';
   if(pending){app.innerHTML=recoveryHTML();return;}
-  if(receipt){app.innerHTML=receiptHTML();return;}
+  if(receipt){app.innerHTML=receiptHTML();startTracking(receipt,token,updated=>{receipt=updated;window.render();});return;}
   baseRender();
   // Replace only static prototype labels, never database-supplied text.
   const tag=app.querySelector('.tabletag');
@@ -85,7 +86,7 @@ async function init(){
     restaurant=data.restaurant;tableNumber=data.table_number;
     menu.splice(0,menu.length,...data.products.map((p,index)=>({...p,id:index+1,productId:p.id,price:p.price_cents/100,description:p.description||'',allergens:p.allergens||'Vraag het personeel.',options:p.options||[],emoji:p.category==='Drinken'?'🥤':p.category==='Dessert'?'🍫':'🍽️',color:'',tag:'',extra:null})));
     cart=[];orders=[];method='cash';page='menu';category='Alles';
-    pending=hasPendingCashOrder(token);window.render();
+    pending=hasPendingCashOrder(token);receipt=pending?null:loadReceipt(token);window.render();
   }catch(error){
     restaurant=null;
     app.innerHTML=`<section class="checkout"><div class="box"><h1>Menu niet beschikbaar</h1><p role="alert">${escapeHtml(error.message)}</p><p class="small">Scan de QR-code opnieuw of vraag het personeel om hulp. Open deze site via HTTPS met een geldig ?table= token.</p><button class="secondary full" onclick="location.reload()">Opnieuw proberen</button></div></section>`;
