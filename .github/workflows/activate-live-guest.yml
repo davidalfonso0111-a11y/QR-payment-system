@@ -1,0 +1,69 @@
+name: Activate live guest module
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/activate-live-guest.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: activate-live-guest
+  cancel-in-progress: false
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out current main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Insert module without replacing existing page
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('index.html')
+          for required in ('index.html', 'js/live-guest.js', 'js/guest-api.js'):
+              if not Path(required).is_file():
+                  raise SystemExit(f'Missing required file: {required}. No changes made.')
+
+          original = path.read_bytes()
+          text = original.decode('utf-8')
+          pattern = r'<script\b[^>]*\bsrc\s*=\s*[\"\x27](?:\./)?js/live-guest\.js[\"\x27][^>]*>'
+          if re.search(pattern, text, re.IGNORECASE):
+              print('Live guest module is already referenced. No changes made.')
+              raise SystemExit(0)
+
+          matches = list(re.finditer(rb'</body\s*>', original, re.IGNORECASE))
+          if len(matches) != 1:
+              raise SystemExit('Expected exactly one closing body tag. No changes made.')
+
+          newline = b'\r\n' if b'\r\n' in original else b'\n'
+          tag = b'<script type="module" src="./js/live-guest.js"></script>'
+          position = matches[0].start()
+          updated = original[:position] + tag + newline + original[position:]
+          path.write_bytes(updated)
+          print('Inserted live guest module; all existing bytes preserved.')
+          PY
+
+      - name: Commit only the activation change
+        shell: bash
+        run: |
+          if git diff --quiet -- index.html; then
+            echo 'Nothing to commit.'
+            exit 0
+          fi
+          git diff --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- index.html
+          git commit -m 'feat: activate live guest menu and cash ordering'
+          git push origin HEAD:main
