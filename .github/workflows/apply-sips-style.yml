@@ -42,7 +42,7 @@ jobs:
           .add{background:var(--sips-gold)!important;color:var(--sips-navy)!important;border-radius:4px!important;width:38px;height:38px}
           button{background:var(--sips-navy);color:var(--sips-cream);border-radius:5px}
           .primary{background:var(--sips-navy)!important;color:var(--sips-cream)!important;border-radius:4px!important;letter-spacing:.035em}
-          .secondary{background:#e9e1d2!important;color:var(--sips-navy)!important;border-radius:4px!important}
+          .secondary{background:#e9e1d2!importantimportant;color:var(--sips-navy)!important;border-radius:4px!important}
           .quantity button{background:var(--sips-cream)!important;color:var(--sips-navy)!important}.back{background:none!important;color:var(--muted)!important}
           .payoption{background:var(--paper)!important;color:var(--sips-navy)!important;border-radius:5px!important}.payoption.selected{border-color:var(--sips-navy)!important;background:#edf0e9!important}
           .statusicon{background:#e8dfc9!important;color:var(--sips-navy)!important}.tracking .active{background:var(--sips-navy)!important;color:var(--sips-cream)!important}
@@ -75,6 +75,7 @@ jobs:
                   html = html.replace('Aan Tafel · Personeel', 'SIPS · Personeel').replace('Aan Tafel — Personeel', 'SIPS — Personeel')
               page.write_text(html, encoding='utf-8')
       - name: Commit theme
+        shell: bash
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -84,3 +85,4 @@ jobs:
           else
             git commit -m 'Apply SIPS-inspired theme without changing ordering or authentication'
             git push
+          fi
