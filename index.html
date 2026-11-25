@@ -8,9 +8,10 @@
 @media(max-width:1000px){.layout{grid-template-columns:minmax(0,1fr) 300px;gap:20px}.orders{grid-template-columns:repeat(2,1fr)}.search{width:100%}}
 @media(max-width:740px){header{padding:15px 18px}.brand{font-size:20px}.nav button{padding:9px 11px;font-size:12px}.wrap{padding:22px 16px 105px}.layout{display:block}.cart{display:none}.hero{padding:24px}.hero h1{font-size:34px}.hero .decor{font-size:60px;right:10px}.grid{gap:12px}.picture{height:104px;font-size:52px}.productbody{padding:13px}.product h3{font-size:14px}.product p{font-size:11px}.mobilecart{position:fixed;bottom:16px;left:16px;right:16px;z-index:4;display:flex;justify-content:space-between;align-items:center;padding:17px 20px;box-shadow:0 8px 20px #244b3b33}.mobilecart.hidden{display:none}.stats{gap:8px}.stat{padding:14px 10px}.stat strong{font-size:22px}.stat .small{font-size:10px}.orders{grid-template-columns:1fr}.adminhead{align-items:flex-start}.adminhead h1{font-size:30px}.checkout h1{font-size:30px}.toast{bottom:85px;width:max-content;max-width:90%}.box{padding:20px}.demo{font-size:10px;padding:9px 18px}.tracking{gap:6px}.tracking span{padding:8px;font-size:10px}}
 </style>
+<link rel="stylesheet" href="./css/sips-theme.css">
 </head>
 <body>
-<header><div class="brand">aan tafel<span>●</span></div><nav class="nav" aria-label="Weergave"><button id="guestTab" class="active" onclick="setView('guest')">Gast</button><button id="staffTab" onclick="setView('staff')">Personeel <span id="orderCount"></span></button></nav></header>
+<header><div class="brand">SIPS<span>●</span></div><nav class="nav" aria-label="Weergave"><button id="guestTab" class="active" onclick="setView('guest')">Gast</button><button id="staffTab" onclick="setView('staff')">Personeel <span id="orderCount"></span></button></nav></header>
 <div class="demo"><span>✦ Klikbaar prototype · Tafel 12 · Geen echte betalingen</span><button onclick="resetDemo()">Demo resetten</button></div>
 <main id="app" class="wrap"></main>
 <div id="overlay" class="overlay hidden" onclick="if(event.target===this)closeModal()"></div>

@@ -3,13 +3,14 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<title>Aan Tafel — Personeel</title>
+<title>SIPS — Personeel</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f6f4ee;color:#213d32;font:16px system-ui,sans-serif}header{background:white;padding:20px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;gap:16px}main{max-width:1100px;margin:auto;padding:24px}section,article{background:white;border:1px solid #e5e7df;border-radius:16px;padding:22px}#login{max-width:420px;margin:30px auto}label{display:block;margin:16px 0 6px}input,select,button{font:inherit;padding:12px;border-radius:9px;border:1px solid #ccd4c5}input{width:100%}button{cursor:pointer;background:#244b3b;color:white}button:disabled{opacity:.5;cursor:wait}.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:20px 0}#orders{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}.muted{color:#667266;font-size:14px}#message{white-space:pre-wrap;line-height:1.5}h1{font-size:28px}h2{font-size:20px}ul{padding-left:22px}li{margin:12px 0}small{display:block;margin-top:5px}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #91af43;outline-offset:2px}[hidden]{display:none!important}
 </style>
+<link rel="stylesheet" href="./css/sips-theme.css">
 </head>
 <body>
-<header><strong>Aan Tafel · Personeel</strong><button id="logout" hidden>Uitloggen</button></header>
+<header><strong>SIPS · Personeel</strong><button id="logout" hidden>Uitloggen</button></header>
 <main>
 <p id="message" role="status" aria-live="polite"></p>
 <section id="login"><h1>Personeelslogin</h1><p class="muted">Log in met je eigen personeelsaccount. Je ziet alleen zaken waarvoor je toegang hebt.</p><form id="form"><label for="email">E-mailadres</label><input id="email" type="email" autocomplete="username" required maxlength="254"><label for="password">Wachtwoord</label><input id="password" type="password" autocomplete="current-password" required><button id="submit" style="margin-top:20px" type="submit">Inloggen</button></form></section>
