@@ -6,7 +6,7 @@
 <title>SIPS · Bar</title>
 <meta name="theme-color" content="#0b1824">
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f6f4ee;color:#213d32;font:16px system-ui,sans-serif}header{background:white;padding:20px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;gap:16px}main{max-width:1100px;margin:auto;padding:24px}section,article{background:white;border:1px solid #e5e7df;border-radius:16px;padding:22px}#login{max-width:420px;margin:30px auto}label{display:block;margin:16px 0 6px}input,select,button{font:inherit;padding:12px;border-radius:9px;border:1px solid #ccd4c5}input{width:100%}button{cursor:pointer;background:#244b3b;color:white}button:disabled{opacity:.5;cursor:wait}.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:20px 0}#orders{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}.muted{color:#667266;font-size:14px}#message{white-space:pre-wrap;line-height:1.5}h1{font-size:28px}h2{font-size:20px}ul{padding-left:22px}li{margin:12px 0}small{display:block;margin-top:5px}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #91af43;outline-offset:2px}[hidden]{display:none!important}.order-actions{display:flex;flex-direction:column;gap:10px;margin-top:20px}.cash-button,.ghost-button{background:#fff;color:#213d32}.danger-button{background:#fff;color:#9b2c2c;border-color:#e2b4b4}.action-note{font-size:13px;line-height:1.5}.warning{background:#fff3e0;border:1px solid #f0c58a;color:#7a4a12;border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.5;margin:10px 0}.waiting{opacity:.7}.closed{opacity:.6}.tabs{display:flex;gap:8px;margin-top:8px}.tabs button{background:#fff;color:#213d32}.tabs button[aria-pressed=true]{background:#183d50!important;color:#fff!important}#menu-list{display:grid;gap:10px}.menu-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #e5e7df}.menu-row.option{padding-left:24px;font-size:14px}.menu-row .soldout{color:#9b2c2c;font-weight:700}.filter{display:flex;gap:8px;align-items:center;font-size:14px}.filter input{width:auto}
+*{box-sizing:border-box}body{margin:0;background:#f6f4ee;color:#213d32;font:16px system-ui,sans-serif}header{background:white;padding:20px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;gap:16px}main{max-width:1100px;margin:auto;padding:24px}section,article{background:white;border:1px solid #e5e7df;border-radius:16px;padding:22px}#login{max-width:420px;margin:30px auto}label{display:block;margin:16px 0 6px}input,select,button{font:inherit;padding:12px;border-radius:9px;border:1px solid #ccd4c5}input{width:100%}button{cursor:pointer;background:#244b3b;color:white}button:disabled{opacity:.5;cursor:wait}.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:20px 0}#orders{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}.muted{color:#667266;font-size:14px}#message{white-space:pre-wrap;line-height:1.5}h1{font-size:28px}h2{font-size:20px}ul{padding-left:22px}li{margin:12px 0}small{display:block;margin-top:5px}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #91af43;outline-offset:2px}[hidden]{display:none!important}.order-actions{display:flex;flex-direction:column;gap:10px;margin-top:20px}.cash-button,.ghost-button{background:#fff;color:#213d32}.danger-button{background:#fff;color:#9b2c2c;border-color:#e2b4b4}.action-note{font-size:13px;line-height:1.5}.warning{background:#fff3e0;border:1px solid #f0c58a;color:#7a4a12;border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.5;margin:10px 0}.waiting{opacity:.7}.closed{opacity:.6}.tabs{display:flex;gap:8px;margin-top:8px}.tabs button{background:#fff;color:#213d32}.tabs button[aria-pressed=true]{background:#183d50!important;color:#fff!important}#menu-list{display:grid;gap:10px}.menu-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #e5e7df}.menu-row.option{padding-left:24px;font-size:14px}.menu-row .soldout{color:#9b2c2c;font-weight:700}.filter{display:flex;gap:8px;align-items:center;font-size:14px}.filter input{width:auto}.sound-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 14px}.sound-bar button{padding:8px 14px}#orders article.new{animation:pulse 1.2s ease-in-out 4;box-shadow:0 0 0 2px #e2c385}@keyframes pulse{50%{box-shadow:0 0 0 6px #e2c38566}}
 </style>
 <link rel="stylesheet" href="./css/sips-theme.css">
 </head>
@@ -17,6 +17,7 @@
 <section id="login"><h1>Personeelslogin</h1><p class="muted">Log in met je eigen personeelsaccount. Je ziet alleen zaken waarvoor je toegang hebt.</p><form id="form"><label for="email">E-mailadres</label><input id="email" type="email" autocomplete="username" required maxlength="254"><label for="password">Wachtwoord</label><input id="password" type="password" autocomplete="current-password" required><button id="submit" style="margin-top:20px" type="submit">Inloggen</button></form></section>
 <section id="dashboard" hidden>
 <div class="toolbar" style="margin-top:0"><label for="restaurant" style="margin:0">Zaak</label><select id="restaurant"></select><button id="reload">Vernieuwen</button><span id="updated" class="muted"></span></div>
+<div class="sound-bar" role="group" aria-label="Geluidsmeldingen"><button id="sound-toggle" type="button" class="ghost-button" aria-pressed="true">🔔 Geluid aan</button><button id="sound-test" type="button" class="ghost-button">Test</button><label class="filter"><input type="checkbox" id="sound-repeat"> Herhaal elke 30 s tot opgepakt</label><span id="sound-hint" class="muted" hidden>Tik ergens op de pagina om geluid toe te staan.</span></div>
 <div class="tabs" role="group" aria-label="Weergave"><button id="tab-orders" type="button" aria-pressed="true">Bestellingen</button><button id="tab-menu" type="button" aria-pressed="false">Menu &amp; uitverkocht</button></div>
 <div id="view-orders"><h1>Bestellingen</h1><p class="muted">Accepteer bestellingen en werk de bereidingsstatus bij. Registreer cash alleen nadat je het geld daadwerkelijk hebt ontvangen. Online bestellingen verschijnen pas als werk zodra de betaling bevestigd is.</p><label class="filter"><input type="checkbox" id="show-closed"> Ook afgeronde, geannuleerde en onbetaalde online bestellingen tonen</label><p class="muted">Maximaal de 100 nieuwste bestellingen. Wijzigingen verschijnen live; zonder liveverbinding wordt iedere 15 seconden vernieuwd.</p><div id="orders"></div></div>
 <div id="view-menu" hidden><h1>Menu &amp; uitverkocht</h1><p class="muted">Zet een drankje of optie op uitverkocht; gasten zien het dan direct niet meer in het menu. Eigenaar/manager kan per drankje een flesfoto instellen. Prijzen en nieuwe dranken wijzig je (voorlopig) in Supabase.</p><div id="menu-list"></div></div>
@@ -24,6 +25,7 @@
 </main>
 <script type="module">
 import {listen} from './js/realtime.js';
+import {unlock as unlockSound, ready as soundReady, chime, keepAwake} from './js/staff-sound.js';
 const URL='https://irzbdxffwcykwdynqvhg.supabase.co';
 const KEY='sb_publishable_pkzvobApP2voeO82K3TRKQ_f5gzdg14';
 const $=id=>document.getElementById(id);
@@ -35,7 +37,7 @@ const cancellable=['awaiting_payment','awaiting_acceptance','received','preparin
 const money=n=>new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).format(Number(n)/100);
 function message(s){$('message').textContent=s;}
 function controls(){const blocked=busy||acting;$('reload').disabled=blocked;$('restaurant').disabled=blocked;document.querySelectorAll('#orders button,#menu-list button').forEach(b=>b.disabled=blocked);}
-function clearSession(){stopLive?.();stopLive=null;liveOn=false;topics={};epoch++;session=null;expires=0;roles={};lastRows=[];$('password').value='';$('orders').replaceChildren();$('menu-list').replaceChildren();$('restaurant').replaceChildren();$('updated').textContent='';$('dashboard').hidden=true;$('logout').hidden=true;$('login').hidden=false;}
+function clearSession(){clearInterval(remindTimer);seenFor=null;seen=new Set();document.title='SIPS · Bar';keepAwake(false);stopLive?.();stopLive=null;liveOn=false;topics={};epoch++;session=null;expires=0;roles={};lastRows=[];$('password').value='';$('orders').replaceChildren();$('menu-list').replaceChildren();$('restaurant').replaceChildren();$('updated').textContent='';$('dashboard').hidden=true;$('logout').hidden=true;$('login').hidden=false;}
 async function request(path,body,token){const r=await fetch(URL+path,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body),cache:'no-store',signal:AbortSignal.timeout(15000)});let data;try{data=await r.json();}catch{throw Error('Onverwacht antwoord van de server.');}if(!r.ok){if(path.startsWith('/auth/'))throw Error('Inloggen of sessie vernieuwen mislukt. Controleer je gegevens en accountbevestiging.');const error=Error(data.message||'Geen toegang of verzoek mislukt.');error.code=data.code;throw error;}return data;}
 function setSession(data){session=data;expires=Date.now()+Number(data.expires_in||3600)*1000;}
 async function freshToken(){if(!session)throw Error('Log opnieuw in.');if(Date.now()>expires-60000){const oldEpoch=epoch;const renewed=await request('/auth/v1/token?grant_type=refresh_token',{refresh_token:session.refresh_token});if(oldEpoch!==epoch)throw Error('Sessie beëindigd.');setSession(renewed);}return session.access_token;}
@@ -53,7 +55,7 @@ function renderOrders(rows){
   const visible=$('show-closed').checked?rows:rows.filter(isOpenWork);
   if(!visible.length){$('orders').append(node('p',rows.length?'Geen open bestellingen. Vink hierboven aan om alles te zien.':'Geen bestellingen gevonden.'));return;}
   for(const o of visible){
-    const card=document.createElement('article');
+    const card=document.createElement('article');card.dataset.id=o.id;
     if(o.status==='awaiting_payment')card.className='waiting';
     else if(['rejected','cancelled'].includes(o.status)&&!o.needs_refund)card.className='closed';
     let statusText=labels[o.status]||o.status;
@@ -76,7 +78,7 @@ function renderOrders(rows){
   }
   controls();
 }
-async function load({preserveMessage=false}={}){if(tab!=='orders')return loadMenu({preserveMessage});if(!session||!$('restaurant').value)return false;if(busy||acting){queued=true;return false;}busy=true;controls();const started=epoch,restaurant=$('restaurant').value;try{const rows=await rpc('qr_staff_orders',{p_restaurant_id:restaurant,p_limit:100});if(started!==epoch||restaurant!==$('restaurant').value)return false;if(!Array.isArray(rows))throw Error('Onverwacht bestellingenformaat.');renderOrders(rows);lastLoad=Date.now();stamp();if(!preserveMessage)message('');return true;}catch(e){if(started===epoch){$('orders').replaceChildren();message('Bestellingen konden niet worden geladen. '+e.message);}return false;}finally{busy=false;controls();flushQueue();}}
+async function load({preserveMessage=false}={}){if(tab!=='orders')return loadMenu({preserveMessage});if(!session||!$('restaurant').value)return false;if(busy||acting){queued=true;return false;}busy=true;controls();const started=epoch,restaurant=$('restaurant').value;try{const rows=await rpc('qr_staff_orders',{p_restaurant_id:restaurant,p_limit:100});if(started!==epoch||restaurant!==$('restaurant').value)return false;if(!Array.isArray(rows))throw Error('Onverwacht bestellingenformaat.');renderOrders(rows);notifyOrders(rows);lastLoad=Date.now();stamp();if(!preserveMessage)message('');return true;}catch(e){if(started===epoch){$('orders').replaceChildren();message('Bestellingen konden niet worden geladen. '+e.message);}return false;}finally{busy=false;controls();flushQueue();}}
 // Runs one mutation, then refreshes. Network failures may still have been processed.
 async function act(label,run){if(busy||acting||!session)return;const started=epoch;acting=true;controls();message(label);let outcome='',failed=false;try{outcome=await run();if(started!==epoch)return;}catch(e){failed=true;if(started!==epoch)return;outcome=e.code==='40001'?'De bestelling is intussen gewijzigd. Controleer de nieuwste status voordat je verdergaat.':'De actie kon niet worden bevestigd. Bij een netwerkfout kan deze toch zijn verwerkt. Controleer de actuele status voordat je opnieuw probeert. '+e.message;}finally{acting=false;controls();}
 if(started!==epoch)return;message(outcome);const refreshed=await load({preserveMessage:true});if(started!==epoch)return;if(refreshed)message(outcome);else if(!failed)message(outcome+' Het overzicht kon niet vernieuwd worden. Klik op Vernieuwen voordat je iets opnieuw doet.');}
@@ -118,22 +120,52 @@ async function loadMenu({preserveMessage=false}={}){if(!session||!$('restaurant'
 // Owner/manager: bottle photo URL (e.g. Supabase Storage public URL). Empty = drawn bottle.
 function setImage(item){const url=window.prompt('Plak het https-adres van de flesfoto (PNG met transparante achtergrond werkt het mooist).\nLaat leeg om de getekende fles te gebruiken.',item.image_url||'');if(url===null)return;const restaurant=$('restaurant').value;return act('Foto opslaan…',async()=>{await rpc('qr_staff_set_product_image',{p_restaurant_id:restaurant,p_product_id:item.id,p_image_url:url.trim()});return url.trim()?'Foto opgeslagen voor '+item.name+'.':'Foto verwijderd; '+item.name+' gebruikt weer de getekende fles.';});}
 function setAvailable(item,kind){const restaurant=$('restaurant').value;return act('Menu bijwerken…',async()=>{await rpc('qr_staff_set_available',{p_restaurant_id:restaurant,p_kind:kind,p_id:item.id,p_available:!item.available});return item.name+(item.available?' staat nu op uitverkocht.':' is weer beschikbaar.');});}
+function loadOrdersQuietly(){if(tab==='orders')return load({preserveMessage:true});return checkOrders();}
+// Menu tab open: still fetch orders in the background for sound alerts.
+async function checkOrders(){if(!session||busy||acting||!$('restaurant').value)return;try{const rows=await rpc('qr_staff_orders',{p_restaurant_id:$('restaurant').value,p_limit:100});if(Array.isArray(rows)){lastRows=rows;notifyOrders(rows);lastLoad=Date.now();}}catch{}}
 function flushQueue(){if(queued&&!busy&&!acting){queued=false;setTimeout(()=>load({preserveMessage:true}),0);}}
+// ---- Sound alerts -----------------------------------------------------------
+const pref=(k,d)=>{try{const v=localStorage.getItem('sips:'+k);return v===null?d:v==='1';}catch{return d;}};
+const setPref=(k,v)=>{try{localStorage.setItem('sips:'+k,v?'1':'0');}catch{}};
+let soundOn=pref('sound',true),repeatOn=pref('sound-repeat',true),seen=new Set(),seenFor=null,remindTimer=null;
+// Orders that need someone at the bar: cash to accept, or paid online orders not started yet.
+const needsAction=o=>o.status==='awaiting_acceptance'||(o.payment_method==='online'&&o.payment_status==='paid'&&o.status==='received');
+function soundUI(){$('sound-toggle').textContent=soundOn?'🔔 Geluid aan':'🔕 Geluid uit';$('sound-toggle').setAttribute('aria-pressed',String(soundOn));$('sound-repeat').checked=repeatOn;$('sound-repeat').disabled=!soundOn;$('sound-hint').hidden=!soundOn||soundReady()||!session;}
+function notifyOrders(rows){
+  const restaurant=$('restaurant').value;
+  const pending=rows.filter(needsAction);
+  document.title=(pending.length?'('+pending.length+') ':'')+'SIPS · Bar';
+  if(seenFor!==restaurant){seenFor=restaurant;seen=new Set(rows.map(o=>o.id));return;} // first load: no sound for existing orders
+  const fresh=pending.filter(o=>!seen.has(o.id));
+  rows.forEach(o=>seen.add(o.id));
+  if(!fresh.length)return;
+  for(const o of fresh)document.querySelector('#orders article[data-id="'+CSS.escape(o.id)+'"]')?.classList.add('new');
+  if(soundOn)chime('new');
+  message(fresh.length===1?'Nieuwe bestelling: tafel '+fresh[0].table_number+' · #'+fresh[0].order_number:fresh.length+' nieuwe bestellingen');
+}
+function startReminders(){clearInterval(remindTimer);remindTimer=setInterval(()=>{if(session&&soundOn&&repeatOn&&lastRows.some(needsAction))chime('reminder');},30000);}
+$('sound-toggle').addEventListener('click',()=>{soundOn=!soundOn;setPref('sound',soundOn);if(soundOn){unlockSound();chime('new');}soundUI();keepAwake(soundOn&&!!session);});
+$('sound-test').addEventListener('click',()=>{unlockSound();chime('new');soundUI();});
+$('sound-repeat').addEventListener('change',e=>{repeatOn=e.target.checked;setPref('sound-repeat',repeatOn);});
+// Any tap unlocks audio (browsers block sound until the user interacts).
+document.addEventListener('pointerdown',()=>{if(soundOn&&!soundReady()){unlockSound();setTimeout(soundUI,100);}},{capture:true});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&session)keepAwake(soundOn);});
 function stamp(){$('updated').textContent=(liveOn?'● Live · ':'')+'Bijgewerkt: '+new Date().toLocaleTimeString('nl-NL');}
 // Live: the database sends a "changed" signal; we then reload through the normal RPC.
-function liveReload(){clearTimeout(liveTimer);liveTimer=setTimeout(()=>{if(busy||acting){liveReload();return;}if(tab==='orders'&&!document.hidden)load({preserveMessage:true});},150);}
+function liveReload(){clearTimeout(liveTimer);liveTimer=setTimeout(()=>{if(busy||acting){liveReload();return;}if(tab==='orders'||soundOn)loadOrdersQuietly();},150);}
 function startLive(){stopLive?.();stopLive=null;liveOn=false;const topic=topics[$('restaurant').value];if(!topic)return;stopLive=listen(URL,KEY,topic,{onSignal:liveReload,onStatus:on=>{liveOn=on;if($('updated').textContent)stamp();}});}
 function showTab(name){tab=name;$('tab-orders').setAttribute('aria-pressed',String(name==='orders'));$('tab-menu').setAttribute('aria-pressed',String(name==='menu'));$('view-orders').hidden=name!=='orders';$('view-menu').hidden=name!=='menu';load();}
 // ---- Session -----------------------------------------------------------------
-$('form').addEventListener('submit',async e=>{e.preventDefault();if(busy||acting)return;$('submit').disabled=true;message('Inloggen…');try{const data=await request('/auth/v1/token?grant_type=password',{email:$('email').value.trim(),password:$('password').value});setSession(data);$('password').value='';const restaurants=await rpc('qr_staff_restaurants',{});if(!Array.isArray(restaurants)||!restaurants.length)throw Error('Je account heeft geen actieve toegang tot een zaak.');$('restaurant').replaceChildren();roles={};topics={};for(const r of restaurants){roles[r.id]=r.role;if(r.live_topic)topics[r.id]=r.live_topic;const option=node('option',r.name+' · '+r.role);option.value=r.id;$('restaurant').append(option);}$('login').hidden=true;$('dashboard').hidden=false;$('logout').hidden=false;await load();startLive();}catch(e){clearSession();message(e.message);}finally{$('submit').disabled=false;}});
+$('form').addEventListener('submit',async e=>{e.preventDefault();if(busy||acting)return;if(soundOn)unlockSound();$('submit').disabled=true;message('Inloggen…');try{const data=await request('/auth/v1/token?grant_type=password',{email:$('email').value.trim(),password:$('password').value});setSession(data);$('password').value='';const restaurants=await rpc('qr_staff_restaurants',{});if(!Array.isArray(restaurants)||!restaurants.length)throw Error('Je account heeft geen actieve toegang tot een zaak.');$('restaurant').replaceChildren();roles={};topics={};for(const r of restaurants){roles[r.id]=r.role;if(r.live_topic)topics[r.id]=r.live_topic;const option=node('option',r.name+' · '+r.role);option.value=r.id;$('restaurant').append(option);}$('login').hidden=true;$('dashboard').hidden=false;$('logout').hidden=false;await load();startLive();startReminders();soundUI();keepAwake(soundOn);}catch(e){clearSession();message(e.message);}finally{$('submit').disabled=false;}});
 $('logout').addEventListener('click',async()=>{const token=session?.access_token;clearSession();message('Uitgelogd op dit apparaat.');if(token){try{await request('/auth/v1/logout?scope=local',{},token);}catch{message('Lokale sessie gewist. Serverafmelding kon niet worden bevestigd.');}}});
 $('reload').addEventListener('click',()=>load());
-$('restaurant').addEventListener('change',()=>{$('orders').replaceChildren();$('menu-list').replaceChildren();load();startLive();});
+$('restaurant').addEventListener('change',()=>{seenFor=null;$('orders').replaceChildren();$('menu-list').replaceChildren();load();startLive();});
 $('show-closed').addEventListener('change',()=>renderOrders(lastRows));
 $('tab-orders').addEventListener('click',()=>showTab('orders'));
 $('tab-menu').addEventListener('click',()=>showTab('menu'));
-setInterval(()=>{if(!document.hidden&&tab==='orders'&&(!liveOn||Date.now()-lastLoad>60000))load({preserveMessage:true});},15000);
+setInterval(()=>{if((!document.hidden||soundOn)&&(!liveOn||Date.now()-lastLoad>60000))loadOrdersQuietly();},15000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&tab==='orders')load({preserveMessage:true});});
+soundUI();
 // Tokens blijven uitsluitend in geheugen; vernieuwen van de pagina vereist opnieuw inloggen.
 </script>
 </body>
