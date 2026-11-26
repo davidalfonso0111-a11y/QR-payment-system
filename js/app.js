@@ -117,7 +117,7 @@ function openDrink(id){
   let chosen = null, qty = 1;
   const price = () => (p.price_cents + (option(p, chosen)?.price_cents || 0)) * qty;
   sheet.innerHTML = `<div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
-    <button class="close" aria-label="Sluiten">×</button>
+    <div class="sheet-top"><span class="grab" aria-hidden="true"></span><span class="sheet-top-name">${esc(p.name)}</span><button class="close" aria-label="Sluiten">×</button></div>
     <div class="drink-art big"><span class="spot"></span><span class="bottle">${bottleHTML(p)}</span><span class="glass-wrap" id="sheet-glass">${glassSVG({glass:p.glass,color:p.liquid_color,level:.62,ice:p.ice,label:p.name})}</span><span class="shelf"></span></div>
     <p class="eyebrow">${esc(p.category)}</p><h2 id="sheet-title">${esc(p.name)}</h2><p class="desc">${esc(p.description)}</p>
     ${p.options.length ? `<fieldset class="serve"><legend>Hoe wil je het?</legend>

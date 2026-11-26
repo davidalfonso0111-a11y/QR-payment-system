@@ -209,3 +209,15 @@ h2{font-size:24px}
 .loader-glass.is3d .shelf{display:none}
 .loader-glass.is3d.off{opacity:.6;filter:grayscale(.5)}
 @keyframes fadein{from{opacity:0}}
+
+/* product sheet on phones: always reachable close button and order button */
+.sheet-card{max-height:92vh;max-height:92dvh;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-top:0}
+.sheet-top{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:12px;margin:0 -20px 10px;padding:12px 14px 12px 20px;
+  background:linear-gradient(180deg,var(--navy-3) 80%,#16324a00);}
+.sheet-top .grab{position:absolute;left:50%;top:5px;width:42px;height:4px;margin-left:-21px;border-radius:4px;background:#ffffff40}
+.sheet-top-name{flex:1;font-family:var(--serif);font-size:17px;color:var(--gold-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.9}
+.sheet-top .close{position:static;flex:none;width:44px;height:44px;font-size:26px;background:#0b1824;border:1px solid #c9a45c88;color:var(--cream)}
+.sheet-actions{position:sticky;bottom:calc(-1 * max(22px,env(safe-area-inset-bottom)));z-index:6;margin:12px -20px 0;padding:12px 20px max(14px,env(safe-area-inset-bottom));
+  background:linear-gradient(0deg,var(--navy-2) 80%,#10243400)}
+@media(max-width:520px){.drink-art.big{height:200px}.drink-art.big .bottle{height:170px}}
+@media(max-height:640px){.drink-art.big{height:170px}}
