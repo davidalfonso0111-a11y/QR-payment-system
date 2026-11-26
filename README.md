@@ -83,7 +83,7 @@ Maak er met een QR-generator naar keuze een code van en print die voor elke tafe
 
 Op `staff.html` klinkt een bel bij elke nieuwe bestelling die opgepakt moet worden: een cashbestelling die geaccepteerd moet worden, of een betaalde online bestelling. Zolang er zo'n bestelling openstaat, klinkt er elke 30 seconden een zachtere herinnering (uit te zetten). Nieuwe bestellingen lichten op en het tabblad toont het aantal open bestellingen.
 
-- **Geluid aan/uit** en **Test** staan boven de bestellingen; de keuze wordt op het toestel onthouden.
+- **Geluid aan/uit**, de **keuze van het geluid** (Bar-bel, Glazen klinken, Ding-dong, Lounge, Kassa, Luid signaal), het **volume** en **Test** staan boven de bestellingen. De keuzes worden op het toestel onthouden.
 - Browsers spelen pas geluid af na een tik op de pagina. Inloggen telt als tik; anders verschijnt een melding.
 - Meldingen komen ook binnen als het tabblad op de achtergrond staat. Het scherm van de tablet blijft aan zolang de pagina open is (waar de browser dat ondersteunt). Zet het volume van de tablet aan en sluit de pagina niet.
 
