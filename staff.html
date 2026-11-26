@@ -3,14 +3,15 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<title>SIPS — Personeel</title>
+<title>SIPS · Bar</title>
+<meta name="theme-color" content="#0b1824">
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f6f4ee;color:#213d32;font:16px system-ui,sans-serif}header{background:white;padding:20px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;gap:16px}main{max-width:1100px;margin:auto;padding:24px}section,article{background:white;border:1px solid #e5e7df;border-radius:16px;padding:22px}#login{max-width:420px;margin:30px auto}label{display:block;margin:16px 0 6px}input,select,button{font:inherit;padding:12px;border-radius:9px;border:1px solid #ccd4c5}input{width:100%}button{cursor:pointer;background:#244b3b;color:white}button:disabled{opacity:.5;cursor:wait}.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:20px 0}#orders{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}.muted{color:#667266;font-size:14px}#message{white-space:pre-wrap;line-height:1.5}h1{font-size:28px}h2{font-size:20px}ul{padding-left:22px}li{margin:12px 0}small{display:block;margin-top:5px}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #91af43;outline-offset:2px}[hidden]{display:none!important}.order-actions{display:flex;flex-direction:column;gap:10px;margin-top:20px}.cash-button,.ghost-button{background:#fff;color:#213d32}.danger-button{background:#fff;color:#9b2c2c;border-color:#e2b4b4}.action-note{font-size:13px;line-height:1.5}.warning{background:#fff3e0;border:1px solid #f0c58a;color:#7a4a12;border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.5;margin:10px 0}.waiting{opacity:.7}.closed{opacity:.6}.tabs{display:flex;gap:8px;margin-top:8px}.tabs button{background:#fff;color:#213d32}.tabs button[aria-pressed=true]{background:#183d50!important;color:#fff!important}#menu-list{display:grid;gap:10px}.menu-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #e5e7df}.menu-row.option{padding-left:24px;font-size:14px}.menu-row .soldout{color:#9b2c2c;font-weight:700}.filter{display:flex;gap:8px;align-items:center;font-size:14px}.filter input{width:auto}
 </style>
 <link rel="stylesheet" href="./css/sips-theme.css">
 </head>
 <body>
-<header><strong>SIPS · Personeel</strong><button id="logout" hidden>Uitloggen</button></header>
+<header><strong>SIPS · BAR</strong><button id="logout" hidden>Uitloggen</button></header>
 <main>
 <p id="message" role="status" aria-live="polite"></p>
 <section id="login"><h1>Personeelslogin</h1><p class="muted">Log in met je eigen personeelsaccount. Je ziet alleen zaken waarvoor je toegang hebt.</p><form id="form"><label for="email">E-mailadres</label><input id="email" type="email" autocomplete="username" required maxlength="254"><label for="password">Wachtwoord</label><input id="password" type="password" autocomplete="current-password" required><button id="submit" style="margin-top:20px" type="submit">Inloggen</button></form></section>
@@ -18,7 +19,7 @@
 <div class="toolbar" style="margin-top:0"><label for="restaurant" style="margin:0">Zaak</label><select id="restaurant"></select><button id="reload">Vernieuwen</button><span id="updated" class="muted"></span></div>
 <div class="tabs" role="group" aria-label="Weergave"><button id="tab-orders" type="button" aria-pressed="true">Bestellingen</button><button id="tab-menu" type="button" aria-pressed="false">Menu &amp; uitverkocht</button></div>
 <div id="view-orders"><h1>Bestellingen</h1><p class="muted">Accepteer bestellingen en werk de bereidingsstatus bij. Registreer cash alleen nadat je het geld daadwerkelijk hebt ontvangen. Online bestellingen verschijnen pas als werk zodra de betaling bevestigd is.</p><label class="filter"><input type="checkbox" id="show-closed"> Ook afgeronde, geannuleerde en onbetaalde online bestellingen tonen</label><p class="muted">Maximaal de 100 nieuwste bestellingen. Wijzigingen verschijnen live; zonder liveverbinding wordt iedere 15 seconden vernieuwd.</p><div id="orders"></div></div>
-<div id="view-menu" hidden><h1>Menu &amp; uitverkocht</h1><p class="muted">Zet een gerecht of optie op uitverkocht; gasten zien het dan direct niet meer in het menu. Prijzen en nieuwe gerechten wijzig je (voorlopig) in Supabase.</p><div id="menu-list"></div></div>
+<div id="view-menu" hidden><h1>Menu &amp; uitverkocht</h1><p class="muted">Zet een drankje of optie op uitverkocht; gasten zien het dan direct niet meer in het menu. Eigenaar/manager kan per drankje een flesfoto instellen. Prijzen en nieuwe dranken wijzig je (voorlopig) in Supabase.</p><div id="menu-list"></div></div>
 </section>
 </main>
 <script type="module">
@@ -26,7 +27,7 @@ import {listen} from './js/realtime.js';
 const URL='https://irzbdxffwcykwdynqvhg.supabase.co';
 const KEY='sb_publishable_pkzvobApP2voeO82K3TRKQ_f5gzdg14';
 const $=id=>document.getElementById(id);
-let session=null,expires=0,busy=false,acting=false,epoch=0,roles={},topics={},lastRows=[],tab='orders',stopLive=null,liveOn=false,liveTimer=null,lastLoad=0;
+let session=null,expires=0,busy=false,acting=false,epoch=0,roles={},topics={},lastRows=[],tab='orders',stopLive=null,liveOn=false,liveTimer=null,lastLoad=0,queued=false;
 const labels={awaiting_payment:'Wacht op online betaling',awaiting_acceptance:'Wacht op acceptatie',received:'Ontvangen',preparing:'In bereiding',ready:'Klaar',served:'Geserveerd',rejected:'Geweigerd',cancelled:'Geannuleerd'};
 const paymentLabels={paid:'Betaald',unpaid:'Onbetaald',pending:'Betaling bezig',failed:'Betaling mislukt',refunded:'Terugbetaald'};
 const transitions={awaiting_acceptance:['accept','Accepteer bestelling'],received:['prepare','Start bereiding'],preparing:['ready','Markeer als klaar'],ready:['serve','Markeer als geserveerd']};
@@ -75,7 +76,7 @@ function renderOrders(rows){
   }
   controls();
 }
-async function load({preserveMessage=false}={}){if(tab!=='orders')return loadMenu({preserveMessage});if(busy||acting||!session||!$('restaurant').value)return false;busy=true;controls();const started=epoch,restaurant=$('restaurant').value;try{const rows=await rpc('qr_staff_orders',{p_restaurant_id:restaurant,p_limit:100});if(started!==epoch||restaurant!==$('restaurant').value)return false;if(!Array.isArray(rows))throw Error('Onverwacht bestellingenformaat.');renderOrders(rows);lastLoad=Date.now();stamp();if(!preserveMessage)message('');return true;}catch(e){if(started===epoch){$('orders').replaceChildren();message('Bestellingen konden niet worden geladen. '+e.message);}return false;}finally{busy=false;controls();}}
+async function load({preserveMessage=false}={}){if(tab!=='orders')return loadMenu({preserveMessage});if(!session||!$('restaurant').value)return false;if(busy||acting){queued=true;return false;}busy=true;controls();const started=epoch,restaurant=$('restaurant').value;try{const rows=await rpc('qr_staff_orders',{p_restaurant_id:restaurant,p_limit:100});if(started!==epoch||restaurant!==$('restaurant').value)return false;if(!Array.isArray(rows))throw Error('Onverwacht bestellingenformaat.');renderOrders(rows);lastLoad=Date.now();stamp();if(!preserveMessage)message('');return true;}catch(e){if(started===epoch){$('orders').replaceChildren();message('Bestellingen konden niet worden geladen. '+e.message);}return false;}finally{busy=false;controls();flushQueue();}}
 // Runs one mutation, then refreshes. Network failures may still have been processed.
 async function act(label,run){if(busy||acting||!session)return;const started=epoch;acting=true;controls();message(label);let outcome='',failed=false;try{outcome=await run();if(started!==epoch)return;}catch(e){failed=true;if(started!==epoch)return;outcome=e.code==='40001'?'De bestelling is intussen gewijzigd. Controleer de nieuwste status voordat je verdergaat.':'De actie kon niet worden bevestigd. Bij een netwerkfout kan deze toch zijn verwerkt. Controleer de actuele status voordat je opnieuw probeert. '+e.message;}finally{acting=false;controls();}
 if(started!==epoch)return;message(outcome);const refreshed=await load({preserveMessage:true});if(started!==epoch)return;if(refreshed)message(outcome);else if(!failed)message(outcome+' Het overzicht kon niet vernieuwd worden. Klik op Vernieuwen voordat je iets opnieuw doet.');}
@@ -105,12 +106,19 @@ function refund(order,payment){
 function menuRow(item,kind,cls){
   const row=node('div','','menu-row'+(cls?' '+cls:''));
   const name=node('span',item.name+' · '+money(item.price_cents)+(kind==='option'?' extra':''));
+  if(kind==='product'&&item.image_url&&/^https:\/\//.test(item.image_url)){const img=document.createElement('img');img.src=item.image_url;img.alt='';img.className='menu-thumb';img.referrerPolicy='no-referrer';name.prepend(img);}
   if(!item.available)name.append(node('span',' · uitverkocht','soldout'));
-  row.append(name,button(item.available?'Zet op uitverkocht':'Weer beschikbaar',item.available?'danger-button':'',()=>setAvailable(item,kind)));
+  const buttons=node('span','');buttons.style.cssText='display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end';
+  if(kind==='product'&&canManage())buttons.append(button(item.image_url?'Foto wijzigen':'Foto toevoegen','ghost-button',()=>setImage(item)));
+  buttons.append(button(item.available?'Zet op uitverkocht':'Weer beschikbaar',item.available?'danger-button':'',()=>setAvailable(item,kind)));
+  row.append(name,buttons);
   return row;
 }
-async function loadMenu({preserveMessage=false}={}){if(busy||acting||!session||!$('restaurant').value)return false;busy=true;controls();const started=epoch,restaurant=$('restaurant').value;try{const products=await rpc('qr_staff_menu',{p_restaurant_id:restaurant});if(started!==epoch||restaurant!==$('restaurant').value)return false;$('menu-list').replaceChildren();let category=null;for(const p of products){if(p.category!==category){category=p.category;$('menu-list').append(node('h2',category));}$('menu-list').append(menuRow(p,'product'));for(const o of p.options||[])$('menu-list').append(menuRow(o,'option','option'));}if(!products.length)$('menu-list').append(node('p','Nog geen gerechten.'));stamp();if(!preserveMessage)message('');return true;}catch(e){if(started===epoch)message('Menu kon niet worden geladen. '+e.message);return false;}finally{busy=false;controls();}}
+async function loadMenu({preserveMessage=false}={}){if(!session||!$('restaurant').value)return false;if(busy||acting){queued=true;return false;}busy=true;controls();const started=epoch,restaurant=$('restaurant').value;try{const products=await rpc('qr_staff_menu',{p_restaurant_id:restaurant});if(started!==epoch||restaurant!==$('restaurant').value)return false;$('menu-list').replaceChildren();let category=null;for(const p of products){if(p.category!==category){category=p.category;$('menu-list').append(node('h2',category));}$('menu-list').append(menuRow(p,'product'));for(const o of p.options||[])$('menu-list').append(menuRow(o,'option','option'));}if(!products.length)$('menu-list').append(node('p','Nog geen gerechten.'));stamp();if(!preserveMessage)message('');return true;}catch(e){if(started===epoch)message('Menu kon niet worden geladen. '+e.message);return false;}finally{busy=false;controls();flushQueue();}}
+// Owner/manager: bottle photo URL (e.g. Supabase Storage public URL). Empty = drawn bottle.
+function setImage(item){const url=window.prompt('Plak het https-adres van de flesfoto (PNG met transparante achtergrond werkt het mooist).\nLaat leeg om de getekende fles te gebruiken.',item.image_url||'');if(url===null)return;const restaurant=$('restaurant').value;return act('Foto opslaan…',async()=>{await rpc('qr_staff_set_product_image',{p_restaurant_id:restaurant,p_product_id:item.id,p_image_url:url.trim()});return url.trim()?'Foto opgeslagen voor '+item.name+'.':'Foto verwijderd; '+item.name+' gebruikt weer de getekende fles.';});}
 function setAvailable(item,kind){const restaurant=$('restaurant').value;return act('Menu bijwerken…',async()=>{await rpc('qr_staff_set_available',{p_restaurant_id:restaurant,p_kind:kind,p_id:item.id,p_available:!item.available});return item.name+(item.available?' staat nu op uitverkocht.':' is weer beschikbaar.');});}
+function flushQueue(){if(queued&&!busy&&!acting){queued=false;setTimeout(()=>load({preserveMessage:true}),0);}}
 function stamp(){$('updated').textContent=(liveOn?'● Live · ':'')+'Bijgewerkt: '+new Date().toLocaleTimeString('nl-NL');}
 // Live: the database sends a "changed" signal; we then reload through the normal RPC.
 function liveReload(){clearTimeout(liveTimer);liveTimer=setTimeout(()=>{if(busy||acting){liveReload();return;}if(tab==='orders'&&!document.hidden)load({preserveMessage:true});},150);}
