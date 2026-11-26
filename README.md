@@ -13,18 +13,19 @@ Gasten scannen een QR-code op tafel, bestellen van het menu en betalen **online 
 | `index.html` + `js/live-guest.js` | Gastpagina: menu, winkelmand, cash of online betalen, status volgen |
 | `js/guest-api.js` | Cashbestellingen (Supabase) en online bestellingen (`/api/create-payment`) |
 | `js/guest-status.js` | Privé bestelstatus volgen met het geheim op het apparaat van de gast |
+| `js/realtime.js` | Live updates via Supabase Realtime (geen extra bibliotheek nodig) |
 | `staff.html` | Personeel: accepteren, bereiden, cash registreren, weigeren/annuleren, terugbetalen, uitverkocht |
 | `api/create-payment.js` | Maakt online bestelling + Mollie-betaling (hergebruikt een open betaling bij een nieuwe poging) |
 | `api/mollie-webhook.js` | Mollie meldt een statuswijziging; de server haalt de betaling zelf opnieuw op |
 | `api/staff-refund.js` | Online terugbetalen (alleen eigenaar/manager) |
 | `api/_lib.js` | Gedeelde serverhulp (geen eigen route) |
-| `database/001`–`007` | Migraties, in volgorde uitvoeren |
+| `database/001`–`008` | Migraties, in volgorde uitvoeren |
 
 ## Installatie
 
 ### 1. Supabase
 
-1. Voer in de **SQL Editor** de bestanden `database/001_…sql` t/m `database/007_…sql` uit, één voor één en in volgorde. Heb je 001–006 al gedraaid, dan alleen `007`.
+1. Voer in de **SQL Editor** de bestanden `database/001_…sql` t/m `database/008_…sql` uit, één voor één en in volgorde.
 2. Maak in **Authentication** een account aan voor elke medewerker.
 3. Koppel elk account aan de zaak (als administrator in de SQL Editor):
 
@@ -76,6 +77,12 @@ Maak er met een QR-generator naar keuze een code van en print die voor elke tafe
 4. Betaald: de bestelling wordt `received` en verschijnt als werk bij het personeel.
 5. Mislukt/afgebroken: de bestelling wordt pas geannuleerd als er geen andere openstaande betaling meer is. De gast kan met één klik opnieuw proberen.
 6. Betaald voor een geannuleerde bestelling, of dubbel betaald: het personeel ziet **"Let op"** met een knop om terug te betalen.
+
+## Live updates
+
+Gast- en personeelspagina werken zichzelf direct bij, zonder verversen. De database stuurt bij elke wijziging van een bestelling of betaling een leeg "changed"-seintje via Supabase Realtime (`database/008_live_updates.sql`). De pagina haalt daarna de nieuwe status op via de gewone, beveiligde functies. Het seintje zelf bevat dus geen bestelgegevens.
+
+Valt de liveverbinding weg, dan verversen de pagina's automatisch om de paar seconden. Op de personeelspagina staat **● Live** zolang de verbinding er is. In Supabase moeten publieke Realtime-kanalen toegestaan zijn; dat is de standaardinstelling.
 
 Cash: de gast bestelt, het personeel **accepteert** de bestelling en registreert de betaling pas als het geld echt ontvangen is.
 

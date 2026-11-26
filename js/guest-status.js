@@ -1,5 +1,6 @@
 /* Private guest receipt tracking. Never put the secret in URLs or logs.
 Development use: gateway/IP rate limiting required before public pilot. */
+import {listen,guestTopic} from './realtime.js';
 const URL='https://irzbdxffwcykwdynqvhg.supabase.co';
 const KEY='sb_publishable_pkzvobApP2voeO82K3TRKQ_f5gzdg14';
 const PREFIX='qr-payment:receipt:v1:';
@@ -17,6 +18,7 @@ export function loadReceipt(token){return stored(token)?.receipt||null;}
 export function loadRecord(token){return stored(token);}
 function show(){const el=document.getElementById('guest-status-message');if(el)el.textContent=message;}
 export function stopTracking(){
+  session?.stopLive?.();
   session=null;clearTimeout(timer);timer=null;controller?.abort();controller=null;
 }
 function schedule(s,delay){
@@ -31,14 +33,24 @@ export function startTracking(receipt,token,onUpdate){
   session={id:receipt.id,token,secret:value.secret,receipt,onUpdate,failures:0,busy:false,denied:false};
   message='Actuele status wordt opgehaald…';show();
   if(!document.hidden)void poll(session);
+  // Live: the database signals every change; we then fetch the status at once.
+  const s=session;
+  guestTopic(s.secret).then(topic=>{
+    if(session!==s)return;
+    s.stopLive=listen(URL,KEY,topic,{
+      onSignal:()=>{if(session!==s)return;if(s.busy)s.again=true;else schedule(s,50);},
+      onStatus:live=>{s.live=live;}
+    });
+  }).catch(()=>{});
 }
 async function poll(s){
   if(session!==s||s.busy||s.denied||document.hidden)return;
   s.busy=true;
   const c=new AbortController();controller=c;
   const timeout=setTimeout(()=>c.abort(),15000);
-  // Poll faster while an online payment is being confirmed.
-  let delay=s.receipt?.status==='awaiting_payment'?3000:10000;
+  // Polling is the fallback; with a live connection it can be much slower.
+  const pace=r=>r?.status==='awaiting_payment'?(s.live?10000:3000):(s.live?30000:10000);
+  let delay=pace(s.receipt);
   try{
     const response=await fetch(URL+'/rest/v1/rpc/qr_guest_order_status',{
       method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},
@@ -55,11 +67,11 @@ async function poll(s){
     const result=await response.json();
     if(result?.id!==s.id||typeof result.status!=='string'||typeof result.payment_status!=='string'||!Number.isInteger(result.total_cents))throw new Error('Invalid receipt');
     s.failures=0;
-    message='Laatst gecontroleerd om '+new Date().toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+'.';
+    message=(s.live?'Live · ':'')+'Laatst bijgewerkt om '+new Date().toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+'.';
     const updated={...s.receipt,...result};
     const changed=JSON.stringify(updated)!==JSON.stringify(s.receipt);
     s.receipt=updated;
-    if(updated.status==='awaiting_payment')delay=3000;else delay=10000;
+    delay=pace(updated);
     // Do not overwrite a newer order placed in another browser tab.
     try{const current=stored(s.token);if(current?.receipt.id===s.id)localStorage.setItem(PREFIX+s.token,JSON.stringify({...current,receipt:updated}));}catch{}
     if(changed)s.onUpdate(updated);
@@ -71,7 +83,7 @@ async function poll(s){
     message='Status tijdelijk niet bereikbaar. Laatst bekende status blijft staan; we proberen opnieuw. Plaats geen nieuwe bestelling als herhaling.';show();
   }finally{
     clearTimeout(timeout);if(controller===c)controller=null;s.busy=false;
-    if(session===s)schedule(s,delay);
+    if(session===s){if(s.again){s.again=false;delay=50;}schedule(s,delay);}
   }
 }
 document.addEventListener('visibilitychange',()=>{
