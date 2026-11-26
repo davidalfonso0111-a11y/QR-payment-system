@@ -27,6 +27,7 @@
 </header>
 <main>
 <p id="message" role="status" aria-live="polite"></p>
+<button id="sound-hint" type="button" class="sound-banner" hidden>🔇 Geluid staat nog uit in deze browser. <u>Tik hier om meldingen te horen.</u></button>
 <section id="login"><h1>Personeelslogin</h1><p class="muted">Log in met je eigen personeelsaccount. Je ziet alleen zaken waarvoor je toegang hebt.</p><form id="form"><label for="email">E-mailadres</label><input id="email" type="email" autocomplete="username" required maxlength="254"><label for="password">Wachtwoord</label><input id="password" type="password" autocomplete="current-password" required><button id="submit" style="margin-top:20px" type="submit">Inloggen</button></form></section>
 <section id="dashboard" hidden>
 <div class="toolbar"><label for="restaurant" style="margin:0">Zaak</label><select id="restaurant"></select><button id="reload">Vernieuwen</button><span id="updated" class="muted"></span></div>
@@ -58,12 +59,11 @@
   </div>
   <p id="settings-status" class="muted" role="status"></p>
 </div>
-<p id="sound-hint" class="muted setting-hint" hidden>Tik ergens op de pagina om geluid toe te staan.</p>
 </section>
 </main>
 <script type="module">
 import {listen} from './js/realtime.js';
-import {unlock as unlockSound, ready as soundReady, chime as playChime, keepAwake, PRESETS} from './js/staff-sound.js';
+import {unlock as unlockSound, ready as soundReady, chime as playChime, keepAwake, PRESETS, onStateChange} from './js/staff-sound.js';
 const URL='https://irzbdxffwcykwdynqvhg.supabase.co';
 const KEY='sb_publishable_pkzvobApP2voeO82K3TRKQ_f5gzdg14';
 const $=id=>document.getElementById(id);
@@ -247,7 +247,7 @@ $('sound-repeat').addEventListener('change',e=>saveSettings({repeat:e.target.che
 document.querySelectorAll('.segmented [data-sec]').forEach(b=>b.addEventListener('click',()=>saveSettings({repeat_seconds:Number(b.dataset.sec)})));
 $('sound-preset').addEventListener('change',e=>{saveSettings({preset:e.target.value});unlockSound();chime('new');});
 $('sound-volume').addEventListener('change',e=>{saveSettings({volume:Number(e.target.value)});unlockSound();chime('new');});
-$('sound-test').addEventListener('click',()=>{unlockSound();chime('new');soundHint();});
+$('sound-test').addEventListener('click',()=>{unlockSound();chime('new');setTimeout(()=>{soundHint();$('settings-status').textContent=soundReady()?'♪ Testgeluid afgespeeld. Hoor je niets? Controleer het volume en of het toestel op stil staat.':'Geluid kon niet starten in deze browser. Tik nog eens op Test.';},400);});
 // Fetch restaurants again (roles, live topic, settings): after a live signal, so
 // a change made by the owner reaches every device within a moment.
 let settingsTimer=null;
@@ -258,6 +258,8 @@ let seen=new Set(),seenFor=null,remindTimer=null;
 // Orders that need someone at the bar: cash to accept, or paid online orders not started yet.
 const needsAction=o=>o.status==='awaiting_acceptance'||(o.payment_method==='online'&&o.payment_status==='paid'&&o.status==='received');
 function soundHint(){$('sound-hint').hidden=!settings().sound||soundReady()||!session;}
+setInterval(soundHint,2000);
+$('sound-hint').addEventListener('click',()=>{unlockSound();onStateChange(soundHint);chime('new');setTimeout(()=>{soundHint();if(!soundReady())message('Geluid kon niet starten. Staat het toestel op stil of het volume laag? Op iPhone/iPad: zet de stil-schakelaar uit en tik nog eens.');},400);});
 function notifyOrders(rows){
   const restaurant=rid();
   const pending=rows.filter(needsAction);
@@ -273,8 +275,9 @@ function notifyOrders(rows){
 }
 function startReminders(){clearInterval(remindTimer);const s=settings();if(!s.sound||!s.repeat)return;remindTimer=setInterval(()=>{const c=settings();if(session&&c.sound&&c.repeat&&lastRows.some(needsAction))chime('reminder');},s.repeat_seconds*1000);}
 // Any tap unlocks audio (browsers block sound until the user interacts).
-document.addEventListener('pointerdown',()=>{if(settings().sound&&!soundReady()){unlockSound();setTimeout(soundHint,100);}},{capture:true});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&session)keepAwake(settings().sound);});
+// Touch screens only count touchend/click as permission, so listen to all of them.
+for(const ev of ['pointerdown','touchend','click','keydown'])document.addEventListener(ev,()=>{if(settings().sound&&!soundReady()){unlockSound();onStateChange(soundHint);setTimeout(soundHint,150);}},{capture:true,passive:true});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&session){keepAwake(settings().sound);if(settings().sound)unlockSound();setTimeout(soundHint,300);}});
 function stamp(){$('updated').textContent=(liveOn?'● Live · ':'')+'Bijgewerkt: '+new Date().toLocaleTimeString('nl-NL');}
 // Live: the database sends a "changed" signal; we then reload through the normal RPC.
 function liveReload(){clearTimeout(liveTimer);liveTimer=setTimeout(()=>{if(busy||acting){liveReload();return;}if(tab==='orders'||settings().sound)loadOrdersQuietly();},150);refreshRestaurants();}
