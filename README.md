@@ -79,6 +79,14 @@ Maak er met een QR-generator naar keuze een code van en print die voor elke tafe
 - **Flesfoto toevoegen:** maak in Supabase een **Storage**-bucket `bottles` aan (Public) en upload de foto (PNG met transparante achtergrond werkt het mooist). Kopieer de publieke URL. Ga dan op `staff.html` naar **Menu & uitverkocht** en klik bij het drankje op **Foto toevoegen**. Zonder foto tekent de site een fles van het juiste type.
 - Gebruik alleen foto's waarvoor SIPS toestemming heeft (eigen foto's of beeldmateriaal van de leverancier).
 
+## Geluidsmeldingen (personeel)
+
+Op `staff.html` klinkt een bel bij elke nieuwe bestelling die opgepakt moet worden: een cashbestelling die geaccepteerd moet worden, of een betaalde online bestelling. Standaardgeluid is **Lounge**. Herhalen staat standaard uit; wie het vinkje "Herhaal elke 30 s" aanzet, hoort hetzelfde geluid elke 30 seconden zolang er zo'n bestelling openstaat. Nieuwe bestellingen lichten op en het tabblad toont het aantal open bestellingen.
+
+- **Geluid aan/uit**, de **keuze van het geluid** (Bar-bel, Glazen klinken, Ding-dong, Lounge, Kassa, Luid signaal), het **volume** en **Test** staan boven de bestellingen. De keuzes worden op het toestel onthouden.
+- Browsers spelen pas geluid af na een tik op de pagina. Inloggen telt als tik; anders verschijnt een melding.
+- Meldingen komen ook binnen als het tabblad op de achtergrond staat. Het scherm van de tablet blijft aan zolang de pagina open is (waar de browser dat ondersteunt). Zet het volume van de tablet aan en sluit de pagina niet.
+
 ## 3D
 
 De drankkaart, het detailvenster (veeg om de fles te draaien), het inschenken en het wachtscherm zijn echte 3D-scènes (three.js, WebGL2). three.js laadt pas nadat de kaart zichtbaar is, zodat de pagina snel opent. De kaartafbeeldingen worden één keer per bezoek op het toestel gerenderd. Toestellen zonder WebGL2 krijgen automatisch de 2D-versie.
