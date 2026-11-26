@@ -1,38 +1,24 @@
-/* SIPS-inspired maritime theme. Application logic and database values unchanged. */
-:root{--bg:#f4efe5;--paper:#fffcf5;--ink:#183d50;--muted:#64747a;--line:#d9d6c9;--accent:#e5c88f;--green:#183d50;--orange:#9a6837;--sips-navy:#183d50;--sips-cream:#f4efe5;--sips-gold:#e5c88f}
-body{background:var(--sips-cream)!important;color:var(--sips-navy)!important;font-family:Arial,Helvetica,sans-serif;line-height:1.5}
-header{background:var(--sips-navy)!important;color:var(--sips-cream)!important;border-bottom:1px solid #ffffff26!important;padding:22px 5%!important}
-.brand,header>strong{font-family:Georgia,'Times New Roman',serif!important;font-size:30px!important;font-weight:400!important;letter-spacing:2px!important}
-.brand span{color:var(--sips-gold)!important}
-h1,h2,.hero h1,.checkout h1,.success h1{font-family:Georgia,'Times New Roman',serif!important;font-weight:400!important;letter-spacing:-.035em!important}
-h1{font-size:clamp(32px,5vw,58px);line-height:1.12}
-h2{line-height:1.2}h3{font-weight:600}
-.wrap{max-width:1280px;padding-top:38px}.eyebrow{letter-spacing:.2em;font-size:10px}
-.hero{background:var(--sips-navy)!important;border:1px solid #ffffff26;border-radius:3px!important;padding:40px!important;color:var(--sips-cream)!important}
-.hero h1{font-size:clamp(38px,5vw,64px)!important}.hero p{color:#e3e5de!important}.hero .eyebrow{color:var(--sips-gold)!important}
-.hero .decor{display:none}.hero:after{content:'';position:absolute;right:30px;top:30px;width:140px;height:140px;border:1px solid #e5c88f55;border-radius:50%;pointer-events:none}
-.tabletag{color:var(--sips-cream);border-color:#e5c88f60!important;background:transparent!important;letter-spacing:.05em}
-.nav{background:#ffffff12!important;border:1px solid #ffffff25}.nav button{color:var(--sips-cream)!important}.nav button.active{background:var(--sips-gold)!important;color:var(--sips-navy)!important}
-.demo{background:#e7dfd0!important;color:var(--sips-navy)!important}
-.tabs button{background:transparent!important;border-color:#bfc7c6!important;color:var(--sips-navy)!important;border-radius:4px!important;letter-spacing:.04em}
-.tabs button.active{background:var(--sips-navy)!important;color:var(--sips-cream)!important;border-color:var(--sips-navy)!important}
-.product,.cart,.box,.modal,.order,.stat,body>main>section,#orders article{background:var(--paper)!important;border-color:var(--line)!important;border-radius:5px!important;box-shadow:0 8px 26px #183d5005}
-.product{transition:transform .18s ease,box-shadow .18s ease}.product:hover{transform:translateY(-2px);box-shadow:0 10px 24px #183d5010}
-.picture,.picture.warm,.picture.pink{background:linear-gradient(135deg,#e9e4d8,#d5dedb)!important;border-bottom:1px solid var(--line)}
-.badge{background:var(--paper)!important;color:var(--sips-navy)!important;border-radius:3px!important;letter-spacing:.08em}
-.productbody{padding:20px}.product h3{font-family:Georgia,'Times New Roman',serif;font-size:20px;font-weight:400}
-.add{background:var(--sips-gold)!important;color:var(--sips-navy)!important;border-radius:4px!important;width:38px;height:38px}
-button{background:var(--sips-navy);color:var(--sips-cream);border-radius:5px}
-.primary{background:var(--sips-navy)!important;color:var(--sips-cream)!important;border-radius:4px!important;letter-spacing:.035em}
-.secondary{background:#e9e1d2!importantimportant;color:var(--sips-navy)!important;border-radius:4px!important}
-.quantity button{background:var(--sips-cream)!important;color:var(--sips-navy)!important}.back{background:none!important;color:var(--muted)!important}
-.payoption{background:var(--paper)!important;color:var(--sips-navy)!important;border-radius:5px!important}.payoption.selected{border-color:var(--sips-navy)!important;background:#edf0e9!important}
-.statusicon{background:#e8dfc9!important;color:var(--sips-navy)!important}.tracking .active{background:var(--sips-navy)!important;color:var(--sips-cream)!important}
-.pill{background:#efe2c7!important;color:#795428!important}.pill.paid{background:#e0e9e5!important;color:#244b43!important}
-.search,input,textarea,select{background:var(--paper)!important;color:var(--sips-navy)!important;border-color:#bfc7c6!important;border-radius:4px!important}
-.close{background:var(--sips-cream)!important;color:var(--sips-navy)!important}.inlineinfo,.allergens{background:#eee8dd!important;color:var(--sips-navy)!important}
-.small,.muted,footer{color:var(--muted)!important}.toast{background:var(--sips-navy)!important;color:var(--sips-cream)!important}.overlay{background:#102b3bd9!important}
-button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #b68b43!important;outline-offset:3px}
-#login{padding:34px!important;margin:45px auto!important;max-width:460px!important}#login h1{font-size:36px}#submit{width:100%;padding:15px}#dashboard{padding:28px!important}#orders article{padding:24px!important}#orders article h2{font-size:24px}#orders article>strong{font-size:23px;font-family:Georgia,serif}#orders article ul{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding-top:12px;padding-bottom:12px}#message:empty{display:none}
-@media(max-width:740px){header{padding:16px 18px!important}.brand,header>strong{font-size:24px!important}.hero{padding:28px 22px!important}.hero:after{width:90px;height:90px;right:-25px;top:18px}.hero h1{font-size:40px!important}.productbody{padding:14px}.product h3{font-size:17px}.wrap{padding-top:22px}#login{padding:24px!important;margin:20px auto!important}#dashboard{padding:18px!important}body>main{padding:18px}.mobilecart{border-radius:5px!important}}
-@media(prefers-reduced-motion:reduce){.product{transition:none}.product:hover{transform:none}}
+/* SIPS staff theme (staff.html): blue stone, dark wood, gold. Readable behind the bar. */
+:root{--navy:#0b1824;--navy-2:#102434;--navy-3:#16324a;--gold:#c9a45c;--gold-2:#e2c385;--cream:#f3e9d6;--muted:#9fb1bf;--red:#e08a8a}
+body{background:linear-gradient(180deg,#0b1824,#0a1520)!important;color:var(--cream)!important;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif!important}
+header{border-bottom:2px solid var(--gold)!important;box-shadow:0 6px 24px #0008;
+  background:linear-gradient(180deg,#ffffff10,transparent 40%,#00000040),repeating-linear-gradient(90deg,#3a2316 0 3px,#4b2d1b 3px 11px,#5d3a22 11px 13px,#4b2d1b 13px 23px,#3a2316 23px 27px)!important}
+header>strong{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:24px;letter-spacing:.35em;color:var(--gold-2)}
+h1,h2{font-family:Georgia,'Times New Roman',serif!important;font-weight:400!important;color:var(--cream)}
+h2{color:var(--gold-2)}
+section,#orders article{background:linear-gradient(180deg,var(--navy-3),var(--navy-2))!important;border:1px solid #c9a45c40!important;border-radius:14px!important;box-shadow:0 14px 30px #0007;color:var(--cream)}
+.muted,small,.action-note{color:var(--muted)!important}
+input,select{background:#0b1824!important;color:var(--cream)!important;border:1px solid #ffffff2a!important}
+button{background:linear-gradient(180deg,var(--gold-2),var(--gold))!important;color:#14202b!important;border:0!important;font-weight:700}
+.cash-button,.ghost-button,#logout,.tabs button{background:transparent!important;color:var(--cream)!important;border:1px solid #c9a45c88!important;font-weight:600}
+.tabs button[aria-pressed=true]{background:var(--gold)!important;color:#14202b!important}
+.danger-button{background:transparent!important;color:var(--red)!important;border:1px solid #e08a8a88!important}
+.warning{background:#590b1955!important;border:1px solid #b3424f!important;color:var(--cream)!important}
+.menu-row{border-bottom:1px solid #ffffff14!important}
+.menu-row .soldout{color:var(--red)!important}
+.menu-thumb{width:34px;height:44px;object-fit:contain;vertical-align:middle;margin-right:10px}
+#orders article li{border-bottom:1px dashed #ffffff14;padding-bottom:6px}
+#orders article strong{color:var(--gold-2);font-family:Georgia,serif;font-size:20px;font-weight:400}
+#message:not(:empty){background:#c9a45c1f;border:1px solid #c9a45c66;border-radius:10px;padding:10px 14px}
+.waiting{opacity:.65}.closed{opacity:.55}
+:focus-visible{outline:3px solid var(--gold-2)!important;outline-offset:2px}

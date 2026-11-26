@@ -6,6 +6,6 @@
     "node": "22.x"
   },
   "scripts": {
-    "check": "node --check api/_lib.js && node --check api/create-payment.js && node --check api/mollie-webhook.js && node --check api/staff-refund.js && node --input-type=module --check < js/guest-api.js && node --input-type=module --check < js/live-guest.js && node --input-type=module --check < js/guest-status.js && node --input-type=module --check < js/realtime.js"
+    "check": "node --check api/_lib.js && node --check api/create-payment.js && node --check api/mollie-webhook.js && node --check api/staff-refund.js && node --input-type=module --check < js/guest-api.js && node --input-type=module --check < js/app.js && node --input-type=module --check < js/drinkart.js && node --input-type=module --check < js/scene3d.js && node --input-type=module --check < js/guest-status.js && node --input-type=module --check < js/realtime.js"
   }
 }
