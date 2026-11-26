@@ -5,7 +5,7 @@
 <meta name="referrer" content="no-referrer">
 <title>SIPS — Personeel</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f6f4ee;color:#213d32;font:16px system-ui,sans-serif}header{background:white;padding:20px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;gap:16px}main{max-width:1100px;margin:auto;padding:24px}section,article{background:white;border:1px solid #e5e7df;border-radius:16px;padding:22px}#login{max-width:420px;margin:30px auto}label{display:block;margin:16px 0 6px}input,select,button{font:inherit;padding:12px;border-radius:9px;border:1px solid #ccd4c5}input{width:100%}button{cursor:pointer;background:#244b3b;color:white}button:disabled{opacity:.5;cursor:wait}.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:20px 0}#orders{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}.muted{color:#667266;font-size:14px}#message{white-space:pre-wrap;line-height:1.5}h1{font-size:28px}h2{font-size:20px}ul{padding-left:22px}li{margin:12px 0}small{display:block;margin-top:5px}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #91af43;outline-offset:2px}[hidden]{display:none!important}.order-actions{display:flex;flex-direction:column;gap:10px;margin-top:20px}.cash-button{background:#fff;color:#213d32}.action-note{font-size:13px;line-height:1.5}
+*{box-sizing:border-box}body{margin:0;background:#f6f4ee;color:#213d32;font:16px system-ui,sans-serif}header{background:white;padding:20px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;gap:16px}main{max-width:1100px;margin:auto;padding:24px}section,article{background:white;border:1px solid #e5e7df;border-radius:16px;padding:22px}#login{max-width:420px;margin:30px auto}label{display:block;margin:16px 0 6px}input,select,button{font:inherit;padding:12px;border-radius:9px;border:1px solid #ccd4c5}input{width:100%}button{cursor:pointer;background:#244b3b;color:white}button:disabled{opacity:.5;cursor:wait}.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:20px 0}#orders{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}.muted{color:#667266;font-size:14px}#message{white-space:pre-wrap;line-height:1.5}h1{font-size:28px}h2{font-size:20px}ul{padding-left:22px}li{margin:12px 0}small{display:block;margin-top:5px}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #91af43;outline-offset:2px}[hidden]{display:none!important}.order-actions{display:flex;flex-direction:column;gap:10px;margin-top:20px}.cash-button,.ghost-button{background:#fff;color:#213d32}.danger-button{background:#fff;color:#9b2c2c;border-color:#e2b4b4}.action-note{font-size:13px;line-height:1.5}.warning{background:#fff3e0;border:1px solid #f0c58a;color:#7a4a12;border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.5;margin:10px 0}.waiting{opacity:.7}.closed{opacity:.6}.tabs{display:flex;gap:8px;margin-top:8px}.tabs button{background:#fff;color:#213d32}.tabs button[aria-pressed=true]{background:#183d50!important;color:#fff!important}#menu-list{display:grid;gap:10px}.menu-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #e5e7df}.menu-row.option{padding-left:24px;font-size:14px}.menu-row .soldout{color:#9b2c2c;font-weight:700}.filter{display:flex;gap:8px;align-items:center;font-size:14px}.filter input{width:auto}
 </style>
 <link rel="stylesheet" href="./css/sips-theme.css">
 </head>
@@ -14,36 +14,113 @@
 <main>
 <p id="message" role="status" aria-live="polite"></p>
 <section id="login"><h1>Personeelslogin</h1><p class="muted">Log in met je eigen personeelsaccount. Je ziet alleen zaken waarvoor je toegang hebt.</p><form id="form"><label for="email">E-mailadres</label><input id="email" type="email" autocomplete="username" required maxlength="254"><label for="password">Wachtwoord</label><input id="password" type="password" autocomplete="current-password" required><button id="submit" style="margin-top:20px" type="submit">Inloggen</button></form></section>
-<section id="dashboard" hidden><h1>Bestellingen</h1><p class="muted">Accepteer bestellingen en werk de bereidingsstatus bij. Registreer cash alleen nadat je het geld daadwerkelijk hebt ontvangen.</p><div class="toolbar"><label for="restaurant" style="margin:0">Zaak</label><select id="restaurant"></select><button id="reload">Vernieuwen</button><span id="updated" class="muted"></span></div><p class="muted">Maximaal de 100 nieuwste bestellingen. Automatisch vernieuwen iedere 15 seconden terwijl deze pagina zichtbaar is. Testbestellingen staan ook in dit overzicht.</p><div id="orders"></div></section>
+<section id="dashboard" hidden>
+<div class="toolbar" style="margin-top:0"><label for="restaurant" style="margin:0">Zaak</label><select id="restaurant"></select><button id="reload">Vernieuwen</button><span id="updated" class="muted"></span></div>
+<div class="tabs" role="group" aria-label="Weergave"><button id="tab-orders" type="button" aria-pressed="true">Bestellingen</button><button id="tab-menu" type="button" aria-pressed="false">Menu &amp; uitverkocht</button></div>
+<div id="view-orders"><h1>Bestellingen</h1><p class="muted">Accepteer bestellingen en werk de bereidingsstatus bij. Registreer cash alleen nadat je het geld daadwerkelijk hebt ontvangen. Online bestellingen verschijnen pas als werk zodra de betaling bevestigd is.</p><label class="filter"><input type="checkbox" id="show-closed"> Ook afgeronde, geannuleerde en onbetaalde online bestellingen tonen</label><p class="muted">Maximaal de 100 nieuwste bestellingen. Automatisch vernieuwen iedere 15 seconden terwijl deze pagina zichtbaar is.</p><div id="orders"></div></div>
+<div id="view-menu" hidden><h1>Menu &amp; uitverkocht</h1><p class="muted">Zet een gerecht of optie op uitverkocht; gasten zien het dan direct niet meer in het menu. Prijzen en nieuwe gerechten wijzig je (voorlopig) in Supabase.</p><div id="menu-list"></div></div>
+</section>
 </main>
 <script type="module">
 const URL='https://irzbdxffwcykwdynqvhg.supabase.co';
 const KEY='sb_publishable_pkzvobApP2voeO82K3TRKQ_f5gzdg14';
 const $=id=>document.getElementById(id);
-let session=null,expires=0,busy=false,acting=false,epoch=0;
-const labels={awaiting_acceptance:'Wacht op acceptatie',accepted:'Geaccepteerd',received:'Ontvangen',preparing:'In bereiding',ready:'Klaar',served:'Geserveerd',cancelled:'Geannuleerd'};
+let session=null,expires=0,busy=false,acting=false,epoch=0,roles={},lastRows=[],tab='orders';
+const labels={awaiting_payment:'Wacht op online betaling',awaiting_acceptance:'Wacht op acceptatie',received:'Ontvangen',preparing:'In bereiding',ready:'Klaar',served:'Geserveerd',rejected:'Geweigerd',cancelled:'Geannuleerd'};
+const paymentLabels={paid:'Betaald',unpaid:'Onbetaald',pending:'Betaling bezig',failed:'Betaling mislukt',refunded:'Terugbetaald'};
 const transitions={awaiting_acceptance:['accept','Accepteer bestelling'],received:['prepare','Start bereiding'],preparing:['ready','Markeer als klaar'],ready:['serve','Markeer als geserveerd']};
+const cancellable=['awaiting_payment','awaiting_acceptance','received','preparing','ready'];
 const money=n=>new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).format(Number(n)/100);
 function message(s){$('message').textContent=s;}
-function controls(){const blocked=busy||acting;$('reload').disabled=blocked;$('restaurant').disabled=blocked;document.querySelectorAll('#orders button').forEach(b=>b.disabled=blocked);}
-function clearSession(){epoch++;session=null;expires=0;$('password').value='';$('orders').replaceChildren();$('restaurant').replaceChildren();$('updated').textContent='';$('dashboard').hidden=true;$('logout').hidden=true;$('login').hidden=false;}
+function controls(){const blocked=busy||acting;$('reload').disabled=blocked;$('restaurant').disabled=blocked;document.querySelectorAll('#orders button,#menu-list button').forEach(b=>b.disabled=blocked);}
+function clearSession(){epoch++;session=null;expires=0;roles={};lastRows=[];$('password').value='';$('orders').replaceChildren();$('menu-list').replaceChildren();$('restaurant').replaceChildren();$('updated').textContent='';$('dashboard').hidden=true;$('logout').hidden=true;$('login').hidden=false;}
 async function request(path,body,token){const r=await fetch(URL+path,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body),cache:'no-store',signal:AbortSignal.timeout(15000)});let data;try{data=await r.json();}catch{throw Error('Onverwacht antwoord van de server.');}if(!r.ok){if(path.startsWith('/auth/'))throw Error('Inloggen of sessie vernieuwen mislukt. Controleer je gegevens en accountbevestiging.');const error=Error(data.message||'Geen toegang of verzoek mislukt.');error.code=data.code;throw error;}return data;}
 function setSession(data){session=data;expires=Date.now()+Number(data.expires_in||3600)*1000;}
-async function rpc(name,body){if(!session)throw Error('Log opnieuw in.');if(Date.now()>expires-60000){const oldEpoch=epoch;const renewed=await request('/auth/v1/token?grant_type=refresh_token',{refresh_token:session.refresh_token});if(oldEpoch!==epoch)throw Error('Sessie beëindigd.');setSession(renewed);}return request('/rest/v1/rpc/'+name,body,session.access_token);}
+async function freshToken(){if(!session)throw Error('Log opnieuw in.');if(Date.now()>expires-60000){const oldEpoch=epoch;const renewed=await request('/auth/v1/token?grant_type=refresh_token',{refresh_token:session.refresh_token});if(oldEpoch!==epoch)throw Error('Sessie beëindigd.');setSession(renewed);}return session.access_token;}
+async function rpc(name,body){const token=await freshToken();return request('/rest/v1/rpc/'+name,body,token);}
+// Vercel API route (same site): online refunds via Mollie.
+async function api(path,body){const token=await freshToken();const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(body),cache:'no-store',signal:AbortSignal.timeout(30000)});let data={};try{data=await r.json();}catch{}if(!r.ok)throw Error(data.error||'Verzoek mislukt.');return data;}
 function node(tag,text,cls){const e=document.createElement(tag);e.textContent=text;if(cls)e.className=cls;return e;}
-function renderOrders(rows){$('orders').replaceChildren();if(!rows.length){$('orders').append(node('p','Geen bestellingen gevonden.'));return;}for(const o of rows){const card=document.createElement('article');card.append(node('h2','Tafel '+o.table_number+' · #'+o.order_number),node('p',labels[o.status]||o.status),node('p',(o.payment_status==='paid'?'Betaald':o.payment_status==='unpaid'?'Onbetaald':o.payment_status)+' · '+o.payment_method,'muted'));const list=document.createElement('ul');for(const i of o.items||[]){const li=node('li',i.quantity+' × '+i.product_name);if(i.option_name)li.append(node('small','Optie: '+i.option_name));if(i.note)li.append(node('small','Opmerking: '+i.note));list.append(li);}card.append(list,node('strong',money(o.total_cents)),node('p',new Date(o.created_at).toLocaleString('nl-NL'),'muted'));
-const actions=node('div','','order-actions');const next=transitions[o.status];if(next && !(o.payment_method==='online' && o.payment_status!=='paid')){const button=node('button',next[1]);button.type='button';button.addEventListener('click',()=>perform(o,next[0]));actions.append(button);}if(o.payment_method==='cash'&&o.payment_status==='unpaid'&&['received','preparing','ready','served'].includes(o.status)){const button=node('button','Cash ontvangen registreren','cash-button');button.type='button';button.addEventListener('click',()=>perform(o,'cash'));actions.append(button);}if(o.status==='awaiting_acceptance'&&o.payment_method==='cash')actions.append(node('p','Accepteer de bestelling voordat je cash registreert.','muted action-note'));if(o.status==='served'&&o.payment_status==='paid')actions.append(node('p','✓ Geserveerd en betaald','muted'));card.append(actions);$('orders').append(card);}controls();}
-async function load({preserveMessage=false}={}){if(busy||acting||!session||!$('restaurant').value)return false;busy=true;controls();const started=epoch,restaurant=$('restaurant').value;try{const rows=await rpc('qr_staff_orders',{p_restaurant_id:restaurant,p_limit:100});if(started!==epoch||restaurant!==$('restaurant').value)return false;if(!Array.isArray(rows))throw Error('Onverwacht bestellingenformaat.');renderOrders(rows);$('updated').textContent='Bijgewerkt: '+new Date().toLocaleTimeString('nl-NL');if(!preserveMessage)message('');return true;}catch(e){if(started===epoch){$('orders').replaceChildren();message('Bestellingen konden niet worden geladen. '+e.message);}return false;}finally{busy=false;controls();}}
-async function perform(order,action){if(busy||acting||!session)return;const restaurant=$('restaurant').value;const started=epoch;
-if(action==='cash'&&!window.confirm('Bestelling #'+order.order_number+' · Tafel '+order.table_number+'\nBedrag: '+money(order.total_cents)+'\n\nHeb je dit bedrag daadwerkelijk cash ontvangen? Bevestigen registreert een echte betaling.'))return;
-acting=true;controls();message(action==='cash'?'Cashbetaling registreren…':'Bestelstatus bijwerken…');let outcome='',failed=false;try{const result=await rpc('qr_staff_order_action',{p_restaurant_id:restaurant,p_order_id:order.id,p_action:action,p_expected_status:order.status});if(started!==epoch)return;if(!result||result.id!==order.id)throw Error('Onverwacht antwoord bij de actie.');outcome=action==='cash'?(result.replayed?'Cashbetaling was al geregistreerd; geen extra betaling toegevoegd.':'Cashbetaling geregistreerd.'):(result.replayed?'Deze statuswijziging was al uitgevoerd.':'Bestelstatus bijgewerkt.');}catch(e){failed=true;if(started!==epoch)return;outcome=e.code==='40001'?'De bestelling is intussen gewijzigd. Controleer de nieuwste status voordat je verdergaat.':'De actie kon niet worden bevestigd. Bij een netwerkfout kan deze toch zijn verwerkt. Controleer de actuele status voordat je opnieuw probeert. '+e.message;}finally{acting=false;controls();}
-if(started!==epoch)return;message(outcome);const refreshed=await load({preserveMessage:true});if(started!==epoch)return;if(refreshed)message(outcome);else if(!failed)message(outcome+' Het overzicht kon niet vernieuwd worden. Klik op Vernieuwen; registreer de betaling niet opnieuw zonder controle.');}
-$('form').addEventListener('submit',async e=>{e.preventDefault();if(busy||acting)return;$('submit').disabled=true;message('Inloggen…');try{const data=await request('/auth/v1/token?grant_type=password',{email:$('email').value.trim(),password:$('password').value});setSession(data);$('password').value='';const restaurants=await rpc('qr_staff_restaurants',{});if(!Array.isArray(restaurants)||!restaurants.length)throw Error('Je account heeft geen actieve toegang tot een zaak.');$('restaurant').replaceChildren();for(const r of restaurants){const option=node('option',r.name+' · '+r.role);option.value=r.id;$('restaurant').append(option);}$('login').hidden=true;$('dashboard').hidden=false;$('logout').hidden=false;await load();}catch(e){clearSession();message(e.message);}finally{$('submit').disabled=false;}});
+function button(text,cls,onClick){const b=node('button',text,cls);b.type='button';b.addEventListener('click',onClick);return b;}
+function canManage(){return ['owner','manager'].includes(roles[$('restaurant').value]);}
+function isOpenWork(o){return !(['served','rejected','cancelled','awaiting_payment'].includes(o.status))||o.needs_refund||(o.status==='served'&&o.payment_status==='unpaid');}
+// Mirrors qr_payment_refundable in the database (the database decides).
+function refundablePayments(o){const paid=(o.payments||[]).filter(p=>p.status==='paid').sort((a,b)=>String(a.paid_at).localeCompare(String(b.paid_at)));return ['rejected','cancelled'].includes(o.status)?paid:paid.slice(1);}
+function renderOrders(rows){
+  lastRows=rows;$('orders').replaceChildren();
+  const visible=$('show-closed').checked?rows:rows.filter(isOpenWork);
+  if(!visible.length){$('orders').append(node('p',rows.length?'Geen open bestellingen. Vink hierboven aan om alles te zien.':'Geen bestellingen gevonden.'));return;}
+  for(const o of visible){
+    const card=document.createElement('article');
+    if(o.status==='awaiting_payment')card.className='waiting';
+    else if(['rejected','cancelled'].includes(o.status)&&!o.needs_refund)card.className='closed';
+    let statusText=labels[o.status]||o.status;
+    if(o.status==='cancelled'&&o.cancel_reason==='payment_failed')statusText='Geannuleerd · betaling mislukt';
+    card.append(node('h2','Tafel '+o.table_number+' · #'+o.order_number),node('p',statusText),node('p',(paymentLabels[o.payment_status]||o.payment_status)+' · '+(o.payment_method==='online'?'online':'cash'),'muted'));
+    if(o.needs_refund)card.append(node('p','Let op: er is betaald voor een geannuleerde bestelling of er is dubbel betaald. Terugbetalen'+(canManage()?' kan hieronder.':' kan alleen een eigenaar of manager.'),'warning'));
+    const list=document.createElement('ul');
+    for(const i of o.items||[]){const li=node('li',i.quantity+' × '+i.product_name);if(i.option_name)li.append(node('small','Optie: '+i.option_name));if(i.note)li.append(node('small','Opmerking: '+i.note));list.append(li);}
+    card.append(list,node('strong',money(o.total_cents)),node('p',new Date(o.created_at).toLocaleString('nl-NL'),'muted'));
+    const actions=node('div','','order-actions');
+    const next=transitions[o.status];
+    if(next&&!(o.payment_method==='online'&&o.payment_status!=='paid'))actions.append(button(next[1],'',()=>perform(o,next[0])));
+    if(o.payment_method==='cash'&&o.payment_status==='unpaid'&&['received','preparing','ready','served'].includes(o.status))actions.append(button('Cash ontvangen registreren','cash-button',()=>perform(o,'cash')));
+    if(o.status==='awaiting_acceptance'&&o.payment_method==='cash')actions.append(node('p','Accepteer de bestelling voordat je cash registreert.','muted action-note'));
+    if(o.status==='awaiting_payment')actions.append(node('p','De gast is nog aan het betalen. Pas na bevestiging van de betaling kun je deze bestelling bereiden.','muted action-note'));
+    if(cancellable.includes(o.status))actions.append(button(o.status==='awaiting_acceptance'?'Weigeren':'Annuleren','danger-button',()=>cancelOrder(o)));
+    if(canManage())for(const p of refundablePayments(o))actions.append(button((p.method==='online'?'Online terugbetalen · ':'Cash teruggegeven registreren · ')+money(p.amount_cents),'ghost-button',()=>refund(o,p)));
+    if(o.status==='served'&&o.payment_status==='paid')actions.append(node('p','✓ Geserveerd en betaald','muted'));
+    card.append(actions);$('orders').append(card);
+  }
+  controls();
+}
+async function load({preserveMessage=false}={}){if(tab!=='orders')return loadMenu({preserveMessage});if(busy||acting||!session||!$('restaurant').value)return false;busy=true;controls();const started=epoch,restaurant=$('restaurant').value;try{const rows=await rpc('qr_staff_orders',{p_restaurant_id:restaurant,p_limit:100});if(started!==epoch||restaurant!==$('restaurant').value)return false;if(!Array.isArray(rows))throw Error('Onverwacht bestellingenformaat.');renderOrders(rows);$('updated').textContent='Bijgewerkt: '+new Date().toLocaleTimeString('nl-NL');if(!preserveMessage)message('');return true;}catch(e){if(started===epoch){$('orders').replaceChildren();message('Bestellingen konden niet worden geladen. '+e.message);}return false;}finally{busy=false;controls();}}
+// Runs one mutation, then refreshes. Network failures may still have been processed.
+async function act(label,run){if(busy||acting||!session)return;const started=epoch;acting=true;controls();message(label);let outcome='',failed=false;try{outcome=await run();if(started!==epoch)return;}catch(e){failed=true;if(started!==epoch)return;outcome=e.code==='40001'?'De bestelling is intussen gewijzigd. Controleer de nieuwste status voordat je verdergaat.':'De actie kon niet worden bevestigd. Bij een netwerkfout kan deze toch zijn verwerkt. Controleer de actuele status voordat je opnieuw probeert. '+e.message;}finally{acting=false;controls();}
+if(started!==epoch)return;message(outcome);const refreshed=await load({preserveMessage:true});if(started!==epoch)return;if(refreshed)message(outcome);else if(!failed)message(outcome+' Het overzicht kon niet vernieuwd worden. Klik op Vernieuwen voordat je iets opnieuw doet.');}
+function perform(order,action){
+  if(action==='cash'&&!window.confirm('Bestelling #'+order.order_number+' · Tafel '+order.table_number+'\nBedrag: '+money(order.total_cents)+'\n\nHeb je dit bedrag daadwerkelijk cash ontvangen? Bevestigen registreert een echte betaling.'))return;
+  const restaurant=$('restaurant').value;
+  return act(action==='cash'?'Cashbetaling registreren…':'Bestelstatus bijwerken…',async()=>{const result=await rpc('qr_staff_order_action',{p_restaurant_id:restaurant,p_order_id:order.id,p_action:action,p_expected_status:order.status});if(!result||result.id!==order.id)throw Error('Onverwacht antwoord bij de actie.');return action==='cash'?(result.replayed?'Cashbetaling was al geregistreerd; geen extra betaling toegevoegd.':'Cashbetaling geregistreerd.'):(result.replayed?'Deze statuswijziging was al uitgevoerd.':'Bestelstatus bijgewerkt.');});
+}
+function cancelOrder(order){
+  const verb=order.status==='awaiting_acceptance'?'weigeren':'annuleren';
+  const paidNote=order.payment_status==='paid'?'\n\nDeze bestelling is al betaald. Na annuleren moet een eigenaar of manager het bedrag terugbetalen.':'';
+  if(!window.confirm('Bestelling #'+order.order_number+' · Tafel '+order.table_number+' '+verb+'?'+paidNote))return;
+  const restaurant=$('restaurant').value;
+  return act('Bestelling '+verb+'…',async()=>{const result=await rpc('qr_staff_cancel_order',{p_restaurant_id:restaurant,p_order_id:order.id,p_expected_status:order.status});return result.replayed?'Deze bestelling was al '+(verb==='weigeren'?'geweigerd':'geannuleerd')+'.':'Bestelling '+(verb==='weigeren'?'geweigerd':'geannuleerd')+'.';});
+}
+function refund(order,payment){
+  const online=payment.method==='online';
+  const question=online?'Bedrag '+money(payment.amount_cents)+' online terugbetalen aan de gast van bestelling #'+order.order_number+'?\n\nMollie stort het geld terug op de rekening van de gast.':'Heb je '+money(payment.amount_cents)+' cash teruggegeven aan de gast van bestelling #'+order.order_number+'?';
+  if(!window.confirm(question))return;
+  const restaurant=$('restaurant').value;
+  return act('Terugbetaling verwerken…',async()=>{
+    if(online){const r=await api('/api/staff-refund',{restaurant_id:restaurant,order_id:order.id,payment_id:payment.id});return r.replayed?'Deze betaling was al terugbetaald.':'Terugbetaling aangevraagd bij Mollie.';}
+    const r=await rpc('qr_staff_cash_refund',{p_restaurant_id:restaurant,p_order_id:order.id,p_payment_id:payment.id});return r.replayed?'Cashterugbetaling was al geregistreerd.':'Cashterugbetaling geregistreerd.';
+  });
+}
+// ---- Menu & sold out -------------------------------------------------------
+function menuRow(item,kind,cls){
+  const row=node('div','','menu-row'+(cls?' '+cls:''));
+  const name=node('span',item.name+' · '+money(item.price_cents)+(kind==='option'?' extra':''));
+  if(!item.available)name.append(node('span',' · uitverkocht','soldout'));
+  row.append(name,button(item.available?'Zet op uitverkocht':'Weer beschikbaar',item.available?'danger-button':'',()=>setAvailable(item,kind)));
+  return row;
+}
+async function loadMenu({preserveMessage=false}={}){if(busy||acting||!session||!$('restaurant').value)return false;busy=true;controls();const started=epoch,restaurant=$('restaurant').value;try{const products=await rpc('qr_staff_menu',{p_restaurant_id:restaurant});if(started!==epoch||restaurant!==$('restaurant').value)return false;$('menu-list').replaceChildren();let category=null;for(const p of products){if(p.category!==category){category=p.category;$('menu-list').append(node('h2',category));}$('menu-list').append(menuRow(p,'product'));for(const o of p.options||[])$('menu-list').append(menuRow(o,'option','option'));}if(!products.length)$('menu-list').append(node('p','Nog geen gerechten.'));$('updated').textContent='Bijgewerkt: '+new Date().toLocaleTimeString('nl-NL');if(!preserveMessage)message('');return true;}catch(e){if(started===epoch)message('Menu kon niet worden geladen. '+e.message);return false;}finally{busy=false;controls();}}
+function setAvailable(item,kind){const restaurant=$('restaurant').value;return act('Menu bijwerken…',async()=>{await rpc('qr_staff_set_available',{p_restaurant_id:restaurant,p_kind:kind,p_id:item.id,p_available:!item.available});return item.name+(item.available?' staat nu op uitverkocht.':' is weer beschikbaar.');});}
+function showTab(name){tab=name;$('tab-orders').setAttribute('aria-pressed',String(name==='orders'));$('tab-menu').setAttribute('aria-pressed',String(name==='menu'));$('view-orders').hidden=name!=='orders';$('view-menu').hidden=name!=='menu';load();}
+// ---- Session -----------------------------------------------------------------
+$('form').addEventListener('submit',async e=>{e.preventDefault();if(busy||acting)return;$('submit').disabled=true;message('Inloggen…');try{const data=await request('/auth/v1/token?grant_type=password',{email:$('email').value.trim(),password:$('password').value});setSession(data);$('password').value='';const restaurants=await rpc('qr_staff_restaurants',{});if(!Array.isArray(restaurants)||!restaurants.length)throw Error('Je account heeft geen actieve toegang tot een zaak.');$('restaurant').replaceChildren();roles={};for(const r of restaurants){roles[r.id]=r.role;const option=node('option',r.name+' · '+r.role);option.value=r.id;$('restaurant').append(option);}$('login').hidden=true;$('dashboard').hidden=false;$('logout').hidden=false;await load();}catch(e){clearSession();message(e.message);}finally{$('submit').disabled=false;}});
 $('logout').addEventListener('click',async()=>{const token=session?.access_token;clearSession();message('Uitgelogd op dit apparaat.');if(token){try{await request('/auth/v1/logout?scope=local',{},token);}catch{message('Lokale sessie gewist. Serverafmelding kon niet worden bevestigd.');}}});
 $('reload').addEventListener('click',()=>load());
-$('restaurant').addEventListener('change',()=>{$('orders').replaceChildren();load();});
-setInterval(()=>{if(!document.hidden)load({preserveMessage:true});},15000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)load({preserveMessage:true});});
+$('restaurant').addEventListener('change',()=>{$('orders').replaceChildren();$('menu-list').replaceChildren();load();});
+$('show-closed').addEventListener('change',()=>renderOrders(lastRows));
+$('tab-orders').addEventListener('click',()=>showTab('orders'));
+$('tab-menu').addEventListener('click',()=>showTab('menu'));
+setInterval(()=>{if(!document.hidden&&tab==='orders')load({preserveMessage:true});},15000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&tab==='orders')load({preserveMessage:true});});
 // Tokens blijven uitsluitend in geheugen; vernieuwen van de pagina vereist opnieuw inloggen.
 </script>
 </body>
