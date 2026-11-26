@@ -17,6 +17,31 @@ let view = 'menu';      // menu | checkout | receipt | recovery
 let method = 'online', sending = false, failure = '';
 let pendingCash = false, pendingOnline = false, receipt = null, loader = null, toastTimer;
 
+// ---- 3D (three.js), loaded lazily; the 2D drawings stay as fallback ----
+let three = null;            // the scene3d module once loaded
+const shots = new Map();     // product key -> rendered 3D image URL
+const shotKey = p => p.id + '|' + (p.image_url || '');
+let threeLoading = null;
+function load3D(){
+  if (threeLoading) return threeLoading;
+  threeLoading = import('./scene3d.js').then(m => m.supported() ? (three = m) : null).catch(() => null);
+  return threeLoading;
+}
+let shooting = false;
+async function renderShots(){
+  if (shooting || !(await load3D())) return;
+  shooting = true;
+  try {
+    for (const p of products) {
+      if (shots.has(shotKey(p))) continue;
+      try { shots.set(shotKey(p), await three.snapshot(p)); } catch { shots.set(shotKey(p), null); }
+      const url = shots.get(shotKey(p));
+      if (url) document.querySelectorAll(`.drink[data-id="${CSS.escape(p.id)}"] .drink-art`).forEach(el => { el.innerHTML = `<img class="art3d" src="${url}" alt="">`; el.classList.add('is3d'); });
+      await new Promise(r => setTimeout(r, 0));
+    }
+  } finally { shooting = false; }
+}
+
 const STATUS = {
   awaiting_payment:   {label:'Wacht op je betaling', step:0, progress:.12},
   awaiting_acceptance:{label:'Wacht op bevestiging van de bar', step:0, progress:.22},
@@ -58,6 +83,7 @@ function render(){
   app.innerHTML = view === 'checkout' && cart.length ? checkoutHTML() : menuHTML();
   if (view === 'checkout' && !cart.length) view = 'menu';
   renderCartbar();
+  if (view === 'menu') void renderShots();
 }
 
 function renderCartbar(){
@@ -69,8 +95,9 @@ function renderCartbar(){
 function categories(){ return ['Alles', ...new Set(products.map(p => p.category))]; }
 
 function cardHTML(p){
+  const shot = shots.get(shotKey(p));
   return `<button class="drink" data-id="${esc(p.id)}" aria-label="${esc(p.name)}, ${esc(money(p.price_cents))}. Bekijken en bestellen">
-    <span class="drink-art"><span class="spot"></span><span class="bottle">${bottleHTML(p)}</span><span class="glass-wrap">${glassSVG({glass:p.glass,color:p.liquid_color,level:.62,ice:p.ice,label:p.name})}</span><span class="shelf"></span></span>
+    ${shot ? `<span class="drink-art is3d"><img class="art3d" src="${shot}" alt=""></span>` : `<span class="drink-art"><span class="spot"></span><span class="bottle">${bottleHTML(p)}</span><span class="glass-wrap">${glassSVG({glass:p.glass,color:p.liquid_color,level:.62,ice:p.ice,label:p.name})}</span><span class="shelf"></span></span>`}
     <span class="drink-info"><span class="drink-name">${esc(p.name)}</span><span class="drink-desc">${esc(p.description)}</span><span class="drink-price">${money(p.price_cents)}</span></span>
   </button>`;
 }
@@ -103,13 +130,22 @@ function openDrink(id){
     <button class="btn gold" id="pour-btn">Schenk in · <span id="sheet-price">${money(price())}</span></button></div>
   </div>`;
   sheet.hidden = false; document.body.classList.add('locked');
-  const close = () => { sheet.hidden = true; sheet.innerHTML = ''; document.body.classList.remove('locked'); };
+  let show3d = null;
+  if (three) {
+    const art = sheet.querySelector('.drink-art.big');
+    art.classList.add('is3d', 'live3d');
+    art.setAttribute('aria-label', 'Draai de fles door te vegen'); art.setAttribute('role', 'img');
+    show3d = three.mountShowcase(art, p, {ice: !!p.ice});
+  }
+  const close = () => { show3d?.dispose(); show3d = null; sheet.hidden = true; sheet.innerHTML = ''; document.body.classList.remove('locked'); };
   sheet.querySelector('.close').onclick = close;
   sheet.onclick = e => { if (e.target === sheet) close(); };
   sheet.querySelectorAll('input[name=serve]').forEach(r => r.onchange = () => {
     chosen = r.value || null;
     $('#sheet-price').textContent = money(price());
-    $('#sheet-glass').innerHTML = glassSVG({glass:p.glass,color:p.liquid_color,level:.62,ice:servesIce(p, option(p, chosen)?.name),label:p.name});
+    const withIce = servesIce(p, option(p, chosen)?.name);
+    if (show3d) show3d.setIce(withIce);
+    else $('#sheet-glass').innerHTML = glassSVG({glass:p.glass,color:p.liquid_color,level:.62,ice:withIce,label:p.name});
   });
   sheet.querySelectorAll('[data-q]').forEach(b => b.onclick = () => {
     qty = Math.max(1, Math.min(99, qty + Number(b.dataset.q)));
@@ -119,7 +155,8 @@ function openDrink(id){
     const note = $('#note').value.trim().slice(0, 180);
     const optName = option(p, chosen)?.name || '';
     close();
-    await pour(p, {optionName: optName});
+    if (three) { try { await three.pour3D(p, {ice: servesIce(p, optName), caption: p.name + ' wordt ingeschonken…'}); } catch { await pour(p, {optionName: optName}); } }
+    else await pour(p, {optionName: optName});
     const existing = cart.find(l => l.productId === p.id && (l.optionId||null) === chosen && l.note === note);
     if (existing) existing.qty = Math.min(99, existing.qty + qty);
     else cart.push({productId:p.id, optionId:chosen, qty, note});
@@ -193,9 +230,14 @@ function renderReceipt(){
     <p class="fine"><span id="guest-status-message" role="status">Status wordt opgehaald…</span></p>
     ${waiting ? '' : `<button class="btn ${failed?'ghost':'gold'} wide" data-act="new">Nog iets bestellen</button>`}
   </section>`;
-  const svg = app.querySelector('.loader-glass .glass');
-  loader = glassLoader(svg);
-  loader.update(failed ? 0 : (s.progress ?? 1), failed ? 'empty' : s.mode || 'loop');
+  const lp = failed ? 0 : (s.progress ?? 1), lm = failed ? 'empty' : s.mode || 'loop';
+  const box = app.querySelector('.loader-glass');
+  if (three) {
+    box.classList.add('is3d');
+    const l3 = three.mountGlassLoader(box, first, {ice: servesIce(first, firstOpt?.name)});
+    loader = {update: l3.update, stop: l3.dispose};
+  } else loader = glassLoader(box.querySelector('.glass'));
+  loader.update(lp, lm);
   startTracking(r, token, updated => { receipt = updated; render(); });
 }
 
@@ -286,7 +328,9 @@ async function init(){
     pendingCash = hasPendingCashOrder(token);
     pendingOnline = !pendingCash && hasPendingOnlineOrder(token);
     receipt = pendingCash || pendingOnline ? null : loadReceipt(token);
+    if (receipt) await load3D();
     render();
+    void load3D().then(() => { if (view === 'menu' && !receipt) renderShots(); });
   } catch (e) {
     restaurant = null;
     app.innerHTML = `<section class="panel center"><h1>Kaart niet beschikbaar</h1><p class="alert" role="alert">${esc(e.message)}</p><p class="fine">Scan de QR-code op je tafel opnieuw of vraag het aan de bar.</p><button class="btn ghost wide" onclick="location.reload()">Opnieuw proberen</button></section>`;

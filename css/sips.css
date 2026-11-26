@@ -197,3 +197,15 @@ h2{font-size:24px}
   .cats{top:58px}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* 3D */
+.drink-art.is3d{padding:0;background:#0b1824}
+.drink-art.is3d .art3d{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:fadein .35s ease-out}
+.drink-art.live3d{cursor:grab;touch-action:pan-y}
+.drink-art.live3d:active{cursor:grabbing}
+.canvas3d{display:block;width:100%;height:100%;border-radius:inherit}
+.pour3d-stage{width:min(92vw,460px);height:min(62vh,440px);border-radius:18px;overflow:hidden;border:1px solid #c9a45c55;box-shadow:0 30px 60px #000c}
+.loader-glass.is3d{width:min(78vw,300px);height:300px;border-radius:16px;overflow:hidden;border:1px solid #c9a45c40;filter:none}
+.loader-glass.is3d .shelf{display:none}
+.loader-glass.is3d.off{opacity:.6;filter:grayscale(.5)}
+@keyframes fadein{from{opacity:0}}

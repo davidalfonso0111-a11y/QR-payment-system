@@ -11,7 +11,9 @@ Gasten van SIPS scannen een QR-code op tafel, kiezen hun drank (whisky, rum, gin
 | Bestand | Wat |
 |---|---|
 | `index.html` + `js/app.js` + `css/sips.css` | Gastpagina in SIPS-stijl: 18+-check, drankkaart, giet-animatie, bestelling, cash of online betalen, live wachtscherm met vullend glas |
-| `js/drinkart.js` | Glazen, getekende flessen (als er geen foto is), giet-animatie en glas-laadbalk |
+| `js/scene3d.js` | **3D** (three.js): realistische flessen en glazen met lichtbreking, draaibare weergave, 3D-giet-animatie en 3D-wachtglas |
+| `js/vendor/` | three.js r170 (MIT-licentie, zie `LICENSE-three.txt`) |
+| `js/drinkart.js` | 2D-reserve als een toestel geen 3D (WebGL2) aankan |
 | `js/guest-api.js` | Cashbestellingen (Supabase) en online bestellingen (`/api/create-payment`) |
 | `js/guest-status.js` | Privé bestelstatus volgen met het geheim op het apparaat van de gast |
 | `js/realtime.js` | Live updates via Supabase Realtime (geen extra bibliotheek nodig) |
@@ -76,6 +78,12 @@ Maak er met een QR-generator naar keuze een code van en print die voor elke tafe
 - Per drankje bepalen `glass` (`tumbler`, `wine`, `flute`, `snifter`, `copa`, `highball`), `liquid_color` (bijv. `#c8862a`) en `ice` hoe het glas eruitziet.
 - **Flesfoto toevoegen:** maak in Supabase een **Storage**-bucket `bottles` aan (Public) en upload de foto (PNG met transparante achtergrond werkt het mooist). Kopieer de publieke URL. Ga dan op `staff.html` naar **Menu & uitverkocht** en klik bij het drankje op **Foto toevoegen**. Zonder foto tekent de site een fles van het juiste type.
 - Gebruik alleen foto's waarvoor SIPS toestemming heeft (eigen foto's of beeldmateriaal van de leverancier).
+
+## 3D
+
+De drankkaart, het detailvenster (veeg om de fles te draaien), het inschenken en het wachtscherm zijn echte 3D-scènes (three.js, WebGL2). three.js laadt pas nadat de kaart zichtbaar is, zodat de pagina snel opent. De kaartafbeeldingen worden één keer per bezoek op het toestel gerenderd. Toestellen zonder WebGL2 krijgen automatisch de 2D-versie.
+
+Een flesfoto (zie hierboven) wordt in de 3D-scène als fles neergezet. De foto moet dan van een server komen die CORS toestaat; Supabase Storage doet dat standaard. Lukt het laden niet, dan wordt de fles in 3D getekend.
 
 ## Hoe betalen werkt
 
