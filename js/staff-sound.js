@@ -6,13 +6,22 @@ let ctx = null;
 
 export function unlock() {
   try {
+    // iPhone/iPad (Safari 16.4+): play as "media" so the silent switch does not mute alerts.
+    if (navigator.audioSession) { try { navigator.audioSession.type = 'playback'; } catch {} }
     ctx ||= new (window.AudioContext || window.webkitAudioContext)();
-    if (ctx.state === 'suspended') ctx.resume();
+    // 'suspended' before the first tap, 'interrupted' on iOS after the screen was off or a call.
+    if (ctx.state !== 'running') ctx.resume().catch(() => {});
+    // iOS only unlocks audio when something actually plays during the tap: a silent sample.
+    const buf = ctx.createBuffer(1, 1, 22050), src = ctx.createBufferSource();
+    src.buffer = buf; src.connect(ctx.destination); src.start(0);
   } catch { ctx = null; }
   return ready();
 }
 
 export function ready() { return !!ctx && ctx.state === 'running'; }
+
+/** Call fn whenever the audio state changes (e.g. blocked → allowed). */
+export function onStateChange(fn) { if (ctx) ctx.onstatechange = fn; }
 
 // ---------------------------------------------------------------- building blocks
 // Envelope-shaped output node: fast attack, exponential decay.
@@ -100,7 +109,7 @@ export const PRESETS = {
 /** Play preset `id`. kind: 'new' | 'reminder'. */
 export function chime(kind = 'new', volume = .7, id = 'bell') {
   if (!ctx) return false;
-  if (ctx.state === 'suspended') ctx.resume();
+  if (ctx.state !== 'running') ctx.resume().catch(() => {});
   const preset = PRESETS[id] || PRESETS.bell;
   preset.play(ctx, ctx.currentTime + .03, Math.max(.02, Math.min(1, volume)) * .35, kind);
   return ctx.state === 'running';

@@ -86,3 +86,8 @@ button.price-btn{background:transparent!important;color:var(--gold-2)!important;
 button.price-btn:hover{background:#c9a45c1a!important}
 @media(max-width:600px){.menu-row{flex-direction:column;align-items:flex-start}.menu-actions{justify-content:flex-start}.toolbar{gap:8px}}
 @media(max-width:520px){header>strong{font-size:18px!important;letter-spacing:.22em!important;white-space:nowrap}.who{display:none}}
+
+/* Audio blocked banner */
+button.sound-banner{display:block;width:100%;margin:0 0 16px;padding:14px 16px!important;text-align:left;border-radius:12px!important;
+  background:#590b19!important;color:#fff!important;border:1px solid #e08a8a!important;font-weight:600!important;animation:pulse-banner 2s ease-in-out infinite}
+@keyframes pulse-banner{50%{box-shadow:0 0 0 4px #e08a8a55}}
