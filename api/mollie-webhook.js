@@ -1,6 +1,6 @@
 // POST /api/mollie-webhook  (door Mollie aangeroepen met body: id=tr_xxx)
 // We vertrouwen de webhook niet: de betaling wordt opnieuw bij Mollie opgehaald.
-const { rpc, mollie } = require('./_lib');
+const { rpc, mollie, mollieToCents } = require('./_lib');
 
 module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
@@ -19,14 +19,18 @@ module.exports = async (req, res) => {
     }
 
     const payment = await mollie('/payments/' + id, { method: 'GET' });
-    const cents = Math.round(parseFloat(payment.amount.value) * 100);
-
-    await rpc('qr_apply_mollie_status', {
-      p_provider_payment_id: id,
-      p_mollie_status: payment.status,
-      p_amount_cents: cents,
-      p_currency: payment.amount.currency,
-    });
+    try {
+      await rpc('qr_apply_mollie_status', {
+        p_provider_payment_id: id,
+        p_mollie_status: payment.status,
+        p_amount_cents: mollieToCents(payment.amount && payment.amount.value),
+        p_currency: payment.amount && payment.amount.currency,
+      });
+    } catch (e) {
+      // Betaling hoort niet bij ons (bijv. test of ander project): niet eindeloos laten herhalen.
+      if (/Onbekende betaling/.test(e.message)) return res.status(200).end();
+      throw e;
+    }
 
     return res.status(200).end();
   } catch (e) {

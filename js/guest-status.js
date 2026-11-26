@@ -13,6 +13,8 @@ function stored(token){
   }catch{return null;}
 }
 export function loadReceipt(token){return stored(token)?.receipt||null;}
+// Full private record: receipt, secret and (for online orders) the retry data.
+export function loadRecord(token){return stored(token);}
 function show(){const el=document.getElementById('guest-status-message');if(el)el.textContent=message;}
 export function stopTracking(){
   session=null;clearTimeout(timer);timer=null;controller?.abort();controller=null;
@@ -35,7 +37,8 @@ async function poll(s){
   s.busy=true;
   const c=new AbortController();controller=c;
   const timeout=setTimeout(()=>c.abort(),15000);
-  let delay=10000;
+  // Poll faster while an online payment is being confirmed.
+  let delay=s.receipt?.status==='awaiting_payment'?3000:10000;
   try{
     const response=await fetch(URL+'/rest/v1/rpc/qr_guest_order_status',{
       method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},
@@ -56,8 +59,9 @@ async function poll(s){
     const updated={...s.receipt,...result};
     const changed=JSON.stringify(updated)!==JSON.stringify(s.receipt);
     s.receipt=updated;
+    if(updated.status==='awaiting_payment')delay=3000;else delay=10000;
     // Do not overwrite a newer order placed in another browser tab.
-    try{if(stored(s.token)?.receipt.id===s.id)localStorage.setItem(PREFIX+s.token,JSON.stringify({receipt:updated,secret:s.secret}));}catch{}
+    try{const current=stored(s.token);if(current?.receipt.id===s.id)localStorage.setItem(PREFIX+s.token,JSON.stringify({...current,receipt:updated}));}catch{}
     if(changed)s.onUpdate(updated);
     show();
   }catch{

@@ -175,3 +175,125 @@ async function sendCashOrder(token, body) {
 // Any failure retains the EXACT request and secret for a safe retry.
 // A failed request must not be silently discarded or replaced with a new UUID.
 // No staff updates, order lookup, payment simulation or online payment is exposed here.
+
+// ---------------------------------------------------------------------------
+// Online payment (Mollie) through the Vercel route /api/create-payment.
+// The server creates the order + payment; prices still come from the database.
+// The same request body (idempotency key + secret) is kept until the server
+// answered, so a retry never creates a second order. The server reuses an
+// open Mollie payment for a retried request.
+const ONLINE_PREFIX = 'qr-payment:pending-online:v1:';
+const RECEIPT_PREFIX = 'qr-payment:receipt:v1:';
+
+function readPendingOnline(token) {
+  try {
+    const value = JSON.parse(localStorage.getItem(ONLINE_PREFIX + token));
+    if (!value || value.request?.qr_token !== token || !UUID.test(value.request.idempotency_key ?? '')
+        || !/^[0-9a-f]{64}$/.test(value.request.guest_secret ?? '')) return null;
+    return value;
+  } catch { return null; }
+}
+
+export function hasPendingOnlineOrder(token) {
+  return readPendingOnline(validateToken(token)) !== null;
+}
+
+// Safe: an unpaid online order is never prepared by staff.
+export function discardPendingOnlineOrder(token) {
+  try { localStorage.removeItem(ONLINE_PREFIX + validateToken(token)); } catch {}
+}
+
+async function postCreatePayment(request) {
+  let response;
+  try {
+    response = await fetch('/api/create-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
+      cache: 'no-store',
+      signal: AbortSignal.timeout(30000),
+    });
+  } catch {
+    throw new GuestApiError('Geen verbinding met de betaalserver. Probeer het opnieuw; je betaalt niet dubbel.', { uncertain: true });
+  }
+  let data = null;
+  try { data = await response.json(); } catch {}
+  if (!response.ok) {
+    throw new GuestApiError(data?.error || 'Betaling kon niet worden gestart.', {
+      status: response.status, uncertain: response.status >= 500,
+    });
+  }
+  if (!UUID.test(data?.order_id ?? '') || !Number.isInteger(data.total_cents) || data.order_number == null) {
+    throw new GuestApiError('Onvolledig antwoord van de betaalserver. Probeer het opnieuw.', { uncertain: true });
+  }
+  return data;
+}
+
+// Store the private receipt, including what is needed to resume or retry.
+function saveOnlineReceipt(token, data, request, cart) {
+  const receipt = {
+    id: data.order_id, order_number: data.order_number, total_cents: data.total_cents,
+    status: data.status, payment_status: data.payment_status, payment_method: 'online',
+  };
+  localStorage.setItem(RECEIPT_PREFIX + token, JSON.stringify({
+    receipt, secret: request.guest_secret, online: { request, cart },
+  }));
+  return receipt;
+}
+
+async function sendOnline(token, pending) {
+  if (activeRequests.has(token)) {
+    throw new GuestApiError('Er wordt al een betaling gestart. Wacht op het resultaat.');
+  }
+  const task = (async () => {
+    const data = await postCreatePayment(pending.request);
+    let receipt;
+    try { receipt = saveOnlineReceipt(token, data, pending.request, pending.cart); }
+    catch { throw new GuestApiError('Je bestelling kon niet op dit apparaat bewaard worden. Probeer het opnieuw.', { uncertain: true }); }
+    try { localStorage.removeItem(ONLINE_PREFIX + token); } catch {}
+    return { receipt, checkout_url: data.checkout_url || null };
+  })();
+  activeRequests.set(token, task);
+  try { return await task; } finally { activeRequests.delete(token); }
+}
+
+// items: [{product_id, option_id, quantity, note}]; cart: display snapshot for "try again".
+export async function createOnlineOrder(token, items, cart) {
+  token = validateToken(token);
+  const normalized = normalizeItems(items);
+  let pending = readPendingOnline(token);
+  if (pending && JSON.stringify(pending.request.items) !== JSON.stringify(normalized)) {
+    throw new GuestApiError('Er staat nog een onafgeronde betaling klaar. Hervat of annuleer die eerst.');
+  }
+  if (!pending) {
+    if (!globalThis.crypto?.randomUUID || !globalThis.crypto?.getRandomValues) {
+      throw new GuestApiError('Open de website via HTTPS om veilig te bestellen.');
+    }
+    const bytes = crypto.getRandomValues(new Uint8Array(32));
+    pending = {
+      request: {
+        qr_token: token, idempotency_key: crypto.randomUUID(),
+        guest_secret: Array.from(bytes, b => b.toString(16).padStart(2, '0')).join(''),
+        items: normalized,
+      },
+      cart,
+    };
+    try { localStorage.setItem(ONLINE_PREFIX + token, JSON.stringify(pending)); }
+    catch { throw new GuestApiError('De bestelaanvraag kon niet veilig bewaard worden. Er is niets verstuurd.'); }
+  }
+  return sendOnline(token, pending);
+}
+
+export async function retryPendingOnlineOrder(token) {
+  token = validateToken(token);
+  const pending = readPendingOnline(token);
+  if (!pending) throw new GuestApiError('Geen onafgeronde betaling gevonden.');
+  return sendOnline(token, pending);
+}
+
+// Continue paying an order that still waits for payment (same request = same order).
+export async function resumeOnlinePayment(token, record) {
+  token = validateToken(token);
+  if (!record?.online?.request) throw new GuestApiError('Betaling kan op dit apparaat niet worden hervat.');
+  return sendOnline(token, { request: record.online.request, cart: record.online.cart });
+}
