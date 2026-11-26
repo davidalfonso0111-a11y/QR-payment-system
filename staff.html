@@ -127,14 +127,14 @@ function flushQueue(){if(queued&&!busy&&!acting){queued=false;setTimeout(()=>loa
 // ---- Sound alerts -----------------------------------------------------------
 const pref=(k,d)=>{try{const v=localStorage.getItem('sips:'+k);return v===null?d:v==='1';}catch{return d;}};
 const setPref=(k,v)=>{try{localStorage.setItem('sips:'+k,v?'1':'0');}catch{}};
-let soundPreset=(()=>{try{return localStorage.getItem('sips:sound-preset')||'bell';}catch{return 'bell';}})(),soundVolume=(()=>{try{return Number(localStorage.getItem('sips:sound-volume'))||70;}catch{return 70;}})();
-if(!PRESETS[soundPreset])soundPreset='bell';
+let soundPreset=(()=>{try{return localStorage.getItem('sips:sound-preset')||'lounge';}catch{return 'lounge';}})(),soundVolume=(()=>{try{return Number(localStorage.getItem('sips:sound-volume'))||70;}catch{return 70;}})();
+if(!PRESETS[soundPreset])soundPreset='lounge';
 const chime=kind=>playChime(kind,soundVolume/100,soundPreset);
 for(const [id,p] of Object.entries(PRESETS)){const o=document.createElement('option');o.value=id;o.textContent=p.name+' · '+p.desc;$('sound-preset').append(o);}
 $('sound-preset').value=soundPreset;$('sound-volume').value=String(soundVolume);
 $('sound-preset').addEventListener('change',e=>{soundPreset=e.target.value;try{localStorage.setItem('sips:sound-preset',soundPreset);}catch{}unlockSound();chime('new');});
 $('sound-volume').addEventListener('change',e=>{soundVolume=Number(e.target.value);try{localStorage.setItem('sips:sound-volume',String(soundVolume));}catch{}unlockSound();chime('new');});
-let soundOn=pref('sound',true),repeatOn=pref('sound-repeat',true),seen=new Set(),seenFor=null,remindTimer=null;
+let soundOn=pref('sound',true),repeatOn=pref('sound-repeat',false),seen=new Set(),seenFor=null,remindTimer=null;
 // Orders that need someone at the bar: cash to accept, or paid online orders not started yet.
 const needsAction=o=>o.status==='awaiting_acceptance'||(o.payment_method==='online'&&o.payment_status==='paid'&&o.status==='received');
 function soundUI(){$('sound-toggle').textContent=soundOn?'🔔 Geluid aan':'🔕 Geluid uit';$('sound-toggle').setAttribute('aria-pressed',String(soundOn));$('sound-repeat').checked=repeatOn;$('sound-repeat').disabled=!soundOn;$('sound-preset').disabled=!soundOn;$('sound-volume').disabled=!soundOn;$('sound-hint').hidden=!soundOn||soundReady()||!session;}

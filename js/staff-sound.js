@@ -72,9 +72,10 @@ export const PRESETS = {
   },
   lounge: {
     name: 'Lounge', desc: 'Warm vibrafoon-akkoordje, past bij de sfeer',
-    play(ac, t, v, kind) {
+    play(ac, t, v) {
+      // same chord for new orders and reminders (no separate single tone)
       const vib = [[1, 1], [4, .18], [10, .04]];
-      const notes = kind === 'reminder' ? [587.33] : [523.25, 659.25, 783.99, 1046.5];
+      const notes = [523.25, 659.25, 783.99, 1046.5];
       notes.forEach((f, i) => partials(ac, t + i * .11, f, vib, v * .75, 1.9, 'sine', .006));
     },
   },
