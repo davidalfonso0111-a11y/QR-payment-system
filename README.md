@@ -22,13 +22,13 @@ Gasten van SIPS scannen een QR-code op tafel, kiezen hun drank (whisky, rum, gin
 | `api/mollie-webhook.js` | Mollie meldt een statuswijziging; de server haalt de betaling zelf opnieuw op |
 | `api/staff-refund.js` | Online terugbetalen (alleen eigenaar/manager) |
 | `api/_lib.js` | Gedeelde serverhulp (geen eigen route) |
-| `database/001`–`009` | Migraties, in volgorde uitvoeren |
+| `database/001`–`010` | Migraties, in volgorde uitvoeren |
 
 ## Installatie
 
 ### 1. Supabase
 
-1. Voer in de **SQL Editor** de bestanden `database/001_…sql` t/m `database/009_…sql` uit, één voor één en in volgorde.
+1. Voer in de **SQL Editor** de bestanden `database/001_…sql` t/m `database/010_…sql` uit, één voor één en in volgorde.
 2. Maak in **Authentication** een account aan voor elke medewerker.
 3. Koppel elk account aan de zaak (als administrator in de SQL Editor):
 
@@ -79,11 +79,25 @@ Maak er met een QR-generator naar keuze een code van en print die voor elke tafe
 - **Flesfoto toevoegen:** maak in Supabase een **Storage**-bucket `bottles` aan (Public) en upload de foto (PNG met transparante achtergrond werkt het mooist). Kopieer de publieke URL. Ga dan op `staff.html` naar **Menu & uitverkocht** en klik bij het drankje op **Foto toevoegen**. Zonder foto tekent de site een fles van het juiste type.
 - Gebruik alleen foto's waarvoor SIPS toestemming heeft (eigen foto's of beeldmateriaal van de leverancier).
 
+## Personeelspagina: rollen en ☰-menu
+
+Rechtsboven opent de ☰-knop het menu met **Bestellingen**, **Menukaart** en **Instellingen**.
+
+| | Owner | Manager | Personeel |
+|---|---|---|---|
+| Bestellingen afhandelen | ✓ | ✓ | ✓ |
+| Menukaart bekijken, uitverkocht zetten | ✓ | ✓ | ✓ |
+| Prijzen wijzigen | ✓ | – | – |
+| Instellingen (meldingen) | ✓ | – | – |
+| Terugbetalen, flesfoto's | ✓ | ✓ | – |
+
+De database controleert deze rechten; de pagina verbergt alleen wat iemand niet mag gebruiken.
+
 ## Geluidsmeldingen (personeel)
 
 Op `staff.html` klinkt een bel bij elke nieuwe bestelling die opgepakt moet worden: een cashbestelling die geaccepteerd moet worden, of een betaalde online bestelling. Standaardgeluid is **Lounge**. Herhalen staat standaard uit; wie het vinkje "Herhaal elke 30 s" aanzet, hoort hetzelfde geluid elke 30 seconden zolang er zo'n bestelling openstaat. Nieuwe bestellingen lichten op en het tabblad toont het aantal open bestellingen.
 
-- **Geluid aan/uit**, de **keuze van het geluid** (Bar-bel, Glazen klinken, Ding-dong, Lounge, Kassa, Luid signaal), het **volume** en **Test** staan boven de bestellingen. De keuzes worden op het toestel onthouden.
+- De **owner** kiest onder **Instellingen**: geluid aan/uit, welk geluid (Bar-bel, Glazen klinken, Ding-dong, Lounge, Kassa, Luid signaal), volume, en of en hoe vaak de melding herhaalt (30 sec, 1 min of 2 min). Deze instellingen gelden voor **alle toestellen** van het personeel en worden direct doorgegeven.
 - Browsers spelen pas geluid af na een tik op de pagina. Inloggen telt als tik; anders verschijnt een melding.
 - Meldingen komen ook binnen als het tabblad op de achtergrond staat. Het scherm van de tablet blijft aan zolang de pagina open is (waar de browser dat ondersteunt). Zet het volume van de tablet aan en sluit de pagina niet.
 
